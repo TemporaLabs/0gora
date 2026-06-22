@@ -1,20 +1,25 @@
-"""0Gora backend — FastAPI RAG over 0G Compute.
+"""0Gora backend — FastAPI RAG over 0G Compute."""
+from __future__ import annotations
 
-Scaffold (Phase 0.1). The real ingestion/retrieval/generation land in tasks 0.5–0.7:
-- app/ingest.py   — crawl URL -> clean -> chunk -> embed -> upsert (0.5)
-- app/embed.py    — bge/e5 embeddings (0.4)
-- app/retrieve.py — hybrid vector + BM25 (0.6)
-- app/rag.py      — prompt + call 0G compute + citations (0.7)
-"""
 import os
 
-import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-ZEROG_BASE = os.environ.get("ZEROG_BASE_URL", "http://zerog:8090/v1")
+from . import ingest, rag, zerog
 
-app = FastAPI(title="0Gora", version="0.1.0")
+app = FastAPI(title="0Gora", version="0.1.1")
+
+# Contribution is locked by default: open ingestion is deferred until the
+# contributor system exists. It is enabled only when CONTRIBUTE_KEY is set in
+# the environment AND the caller presents it via the X-Contribute-Key header.
+CONTRIBUTE_KEY = os.getenv("CONTRIBUTE_KEY", "")
+
+
+def _guard_contribute(key: str | None) -> None:
+    if not CONTRIBUTE_KEY or key != CONTRIBUTE_KEY:
+        raise HTTPException(status_code=403, detail="Contribution is currently closed.")
 
 
 @app.get("/health")
@@ -24,10 +29,7 @@ async def health():
 
 @app.get("/models")
 async def models():
-    """Proxy the 0G model list (for the model picker)."""
-    async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.get(f"{ZEROG_BASE}/models")
-        return r.json()
+    return {"models": await zerog.models()}
 
 
 class ChatRequest(BaseModel):
@@ -36,6 +38,40 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/chat")
-async def chat(_req: ChatRequest):
-    # TODO(0.6/0.7): hybrid retrieve -> build prompt with citations -> call 0G compute.
-    return {"detail": "not yet implemented — RAG pipeline lands in tasks 0.5–0.7"}
+async def chat(req: ChatRequest):
+    """Hybrid retrieve → prompt with citations → generate + verify on 0G."""
+    return await rag.answer(req.message, req.model)
+
+
+class ContributeRequest(BaseModel):
+    url: str
+    bin: str = "0g"
+    mode: str = "single"  # single | site | sitemap
+    max_pages: int = 40
+
+
+@app.post("/contribute")
+async def contribute(req: ContributeRequest, x_contribute_key: str | None = Header(default=None)):
+    """Community contribute: ingest a URL (single page), a site (recursive crawl), or a sitemap."""
+    _guard_contribute(x_contribute_key)
+    if req.mode == "site":
+        res = await run_in_threadpool(ingest.ingest_site, req.url, req.bin, req.max_pages)
+    elif req.mode == "sitemap":
+        res = await run_in_threadpool(ingest.ingest_sitemap, req.url, req.bin, req.max_pages)
+    else:
+        res = {"chunks": await run_in_threadpool(ingest.ingest_url, req.url, req.bin)}
+    return {"url": req.url, "bin": req.bin, "mode": req.mode, **res}
+
+
+class TextRequest(BaseModel):
+    text: str
+    source: str = "paste"
+    bin: str = "0g"
+
+
+@app.post("/contribute/text")
+async def contribute_text(req: TextRequest, x_contribute_key: str | None = Header(default=None)):
+    """Ingest pasted text (e.g. an X post the crawler can't reach)."""
+    _guard_contribute(x_contribute_key)
+    n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin)
+    return {"source": req.source, "chunks": n}

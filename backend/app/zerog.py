@@ -1,22 +1,27 @@
-"""Client to the 0G compute service (the load-bearing 0G integration) — SCAFFOLD STUB (v0.1.0).
-
-The 0G compute *service* (../zerog, Node) is already implemented. This is the backend-side
-client that calls it. Wiring lands in task 0.7.
-"""
+"""Client to the 0G compute service (the load-bearing 0G integration)."""
 from __future__ import annotations
 
 import os
+
+import httpx
 
 ZEROG_BASE = os.environ.get("ZEROG_BASE_URL", "http://zerog:8090/v1")
 
 
 async def chat(messages: list[dict], model: str | None = None) -> dict:
-    """POST messages to the 0G compute service → {answer, citations?, x_0g_verification}.
-    TODO(0.7): httpx.post(f"{ZEROG_BASE}/chat/completions", json=...); read choices + x_0g_verification.
-    """
-    raise NotImplementedError("zerog.chat — implemented in v0.1.x")
+    """POST to the 0G compute service → {answer, verification}."""
+    payload: dict = {"messages": messages, "stream": False}
+    if model:
+        payload["model"] = model
+    async with httpx.AsyncClient(timeout=180) as c:
+        r = await c.post(f"{ZEROG_BASE}/chat/completions", json=payload)
+        r.raise_for_status()
+        d = r.json()
+    content = (d.get("choices") or [{}])[0].get("message", {}).get("content", "")
+    return {"answer": content, "verification": d.get("x_0g_verification")}
 
 
 async def models() -> list[str]:
-    """List available 0G models from the service. TODO(0.7)."""
-    raise NotImplementedError
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.get(f"{ZEROG_BASE}/models")
+        return [m["id"] for m in r.json().get("data", [])]

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-// 0G compute broker SDK — pinned to NodeAI v6.0.3's working setup (^0.7.5).
+// 0G compute broker SDK — pinned to ^0.7.5 for a known-good broker API.
 async function loadBroker() {
   const candidates = ["@0glabs/0g-serving-broker", "@0gfoundation/0g-compute-ts-sdk"];
   for (const pkg of candidates) {

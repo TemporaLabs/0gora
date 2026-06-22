@@ -29,7 +29,16 @@ services:
       - "8000:8000"
     restart: unless-stopped
 
-  # web (Next.js) added in task 0.8
+  web:
+    build: ../web
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 
 volumes:
   qdrant_data:
