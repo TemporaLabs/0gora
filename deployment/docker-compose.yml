@@ -7,6 +7,7 @@ services:
       - PORT=8090
       - ZEROG_RPC_URL=${ZEROG_RPC_URL:-https://evmrpc.0g.ai}
       - ZEROG_MODEL=${ZEROG_MODEL:-zai-org/GLM-5-FP8}
+      - ZEROG_MODELS=${ZEROG_MODELS:-}
       - ZEROG_MOCK=${ZEROG_MOCK:-false}
       - ZEROG_PRIVATE_KEY=${ZEROG_PRIVATE_KEY:-}
     restart: unless-stopped

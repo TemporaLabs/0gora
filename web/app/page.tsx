@@ -53,18 +53,28 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: q, model: model || undefined }),
       });
-      const d = await r.json();
+      // Parse defensively: an error response may be plain text, not JSON.
+      const raw = await r.text();
+      let d: any = {};
+      try {
+        d = raw ? JSON.parse(raw) : {};
+      } catch {
+        d = { answer: r.ok ? raw : `⚠️ The service returned an error (${r.status}). Please try again.` };
+      }
       setMessages((m) => [
         ...m,
         {
           role: "assistant",
-          content: d.answer || d.detail || "(no answer)",
+          content: d.answer || d.detail || "⚠️ No answer returned. Please try again.",
           citations: d.citations,
           verification: d.x_0g_verification,
         },
       ]);
     } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "Error reaching the backend." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "⚠️ Couldn't reach 0Gora. Check your connection and try again." },
+      ]);
     } finally {
       setBusy(false);
     }

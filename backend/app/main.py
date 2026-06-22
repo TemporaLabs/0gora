@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from . import ingest, rag, zerog
 
-app = FastAPI(title="0Gora", version="0.1.1")
+app = FastAPI(title="0Gora", version="0.1.2")
 
 # Contribution is locked by default: open ingestion is deferred until the
 # contributor system exists. It is enabled only when CONTRIBUTE_KEY is set in
@@ -37,10 +37,28 @@ class ChatRequest(BaseModel):
     model: str | None = None
 
 
+def _friendly_error(exc: Exception) -> str:
+    """Turn an upstream 0G/provider failure into a user-facing message."""
+    msg = str(exc)
+    if "Sub-account" in msg or "InsufficientAvailableBalance" in msg or "depositFund" in msg:
+        return (
+            "⚠️ That model isn't available on 0G right now (its compute provider isn't "
+            "funded yet). Try the default model — it's live and verified on 0G."
+        )
+    if "503" in msg or "not configured" in msg:
+        return "⚠️ The 0G compute service is starting up. Please try again in a moment."
+    return "⚠️ Couldn't get a verified answer from 0G just now. Please try again."
+
+
 @app.post("/chat")
 async def chat(req: ChatRequest):
     """Hybrid retrieve → prompt with citations → generate + verify on 0G."""
-    return await rag.answer(req.message, req.model)
+    if not req.message.strip():
+        return {"answer": "Ask me a question about the knowledge base.", "citations": [], "x_0g_verification": None}
+    try:
+        return await rag.answer(req.message, req.model)
+    except Exception as exc:  # noqa: BLE001 — never surface a raw 500 to the UI
+        return {"answer": _friendly_error(exc), "citations": [], "x_0g_verification": None, "error": str(exc)[:200]}
 
 
 class ContributeRequest(BaseModel):

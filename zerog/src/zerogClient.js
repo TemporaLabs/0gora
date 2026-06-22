@@ -36,11 +36,15 @@ const MOCK_MODELS = ["zai-org/GLM-5-FP8", "glm-5.1", "deepseek-v4-pro", "qwen3.7
  * OpenAI-shaped body + verification. Powers Onyx's model picker over 0G models.
  */
 export class ZerogClient {
-  constructor({ rpcUrl, privateKey, defaultModel, mock }) {
+  constructor({ rpcUrl, privateKey, defaultModel, mock, allowModels }) {
     this.rpcUrl = rpcUrl;
     this.privateKey = privateKey;
     this.defaultModel = defaultModel;
     this.mock = Boolean(mock);
+    // Optional allowlist: only advertise these model ids in the picker. 0G serves
+    // many models, but each provider needs a funded sub-account; restrict the list
+    // to providers we've funded so users can't pick a model that 502s. Empty = all.
+    this.allowModels = Array.isArray(allowModels) && allowModels.length ? allowModels : null;
     this.broker = null;
     this._chain = Promise.resolve(); // serialize broker calls (nonce not concurrency-safe)
     this._services = null;
@@ -82,8 +86,12 @@ export class ZerogClient {
   }
 
   async listChatModels() {
-    if (this.mock) return MOCK_MODELS;
-    return (await this._chatServices()).map((s) => s.model);
+    const all = this.mock ? MOCK_MODELS : (await this._chatServices()).map((s) => s.model);
+    if (!this.allowModels) return all;
+    // Preserve allowlist order; keep only ids 0G actually serves.
+    const served = new Set(all);
+    const picked = this.allowModels.filter((m) => served.has(m));
+    return picked.length ? picked : all;
   }
 
   async _resolve(model) {
