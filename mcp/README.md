@@ -15,8 +15,14 @@ agents use this MCP server. Same verifiable 0G brain.
 | `list_models()` | The TEE-verified 0G models 0Gora offers. |
 
 ## Use it with Claude Code
+
+**Easiest — the hosted remote endpoint** (nothing to install):
 ```bash
-# from anywhere, pointing at the hosted 0Gora:
+claude mcp add --transport http 0gora https://0gora.temporalabs.com/mcp
+```
+
+**Or run the stdio server locally:**
+```bash
 claude mcp add 0gora -- node /path/to/0gora/mcp/src/server.js
 ```
 or add to your project's `.mcp.json` (see [`.mcp.json.example`](.mcp.json.example)):

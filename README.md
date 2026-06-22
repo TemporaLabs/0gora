@@ -54,7 +54,7 @@ Contributors ─► Ingest ─► Chunk + Embed (bge) ─► Qdrant (vector stor
 | `zerog/` | 0G compute service — OpenAI-compatible; runs GLM on 0G via the direct broker + TEE verification |
 | `backend/` | FastAPI — ingestion (URL/site/sitemap/paste), bge embeddings, hybrid retrieval, RAG |
 | `web/` | Next.js chat UI — model picker, citations, "Verified on 0G" badge, Contribute |
-| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*) |
+| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*). Hosted at `/mcp`; or run locally over stdio |
 | `deployment/` | docker-compose (+ prod overlay: nginx + Let's Encrypt) |
 
 ## Stack

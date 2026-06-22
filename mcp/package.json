@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "start:http": "node src/http.js",
     "test": "node test/smoke.mjs"
   },
   "license": "Apache-2.0",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
+    "express": "^4.21.2",
     "zod": "^3.23.8"
   }
 }
