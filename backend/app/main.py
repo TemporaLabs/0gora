@@ -11,6 +11,15 @@ from . import ingest, rag, zerog
 
 app = FastAPI(title="0Gora", version="0.1.2")
 
+
+@app.on_event("startup")
+async def _warmup() -> None:
+    """Eagerly load the embedding model (single-threaded) before serving traffic,
+    so concurrent cold-start requests never race the lazy load."""
+    from . import embed
+
+    await run_in_threadpool(embed.load_model)
+
 # Contribution is locked by default: open ingestion is deferred until the
 # contributor system exists. It is enabled only when CONTRIBUTE_KEY is set in
 # the environment AND the caller presents it via the X-Contribute-Key header.

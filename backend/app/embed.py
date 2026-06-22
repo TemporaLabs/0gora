@@ -2,16 +2,26 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
+import threading
 
 EMBED_MODEL = os.environ.get("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
+_model = None
+_model_lock = threading.Lock()
 
-@lru_cache(maxsize=1)
+
 def load_model():
-    from sentence_transformers import SentenceTransformer
+    """Thread-safe singleton. Lazy init must be guarded: concurrent cold-start
+    requests racing to construct the SentenceTransformer corrupt the torch load
+    ("Cannot copy out of meta tensor"). Double-checked locking serializes the load."""
+    global _model
+    if _model is None:
+        with _model_lock:
+            if _model is None:
+                from sentence_transformers import SentenceTransformer
 
-    return SentenceTransformer(EMBED_MODEL)
+                _model = SentenceTransformer(EMBED_MODEL)
+    return _model
 
 
 def dim() -> int:
