@@ -140,7 +140,7 @@ export class ZerogClient {
 
   async chatCompletion(req) {
     if (this.mock) return this._mockCompletion(req);
-    return this._serialize(() => this._real(req));
+    return this._real(req);
   }
 
   async _real(req) {
@@ -148,20 +148,29 @@ export class ZerogClient {
     const svc = await this._resolve(req.model || this.defaultModel);
     if (!svc) throw new Error("no 0G chatbot service available");
     const provider = svc.provider;
-    if (!this._ack.has(provider)) {
-      try {
-        await broker.inference.acknowledgeProviderSigner(provider);
-      } catch (e) {
-        console.warn("[sidecar] ack:", e?.message);
+
+    // Only the broker's nonce-bound calls need serializing (ack + signed request
+    // headers). The slow LLM fetch and the verify backoff run CONCURRENTLY, so
+    // many requests are in flight at once instead of one-at-a-time. (v0.1.3)
+    const { endpoint, headers } = await this._serialize(async () => {
+      if (!this._ack.has(provider)) {
+        try {
+          await broker.inference.acknowledgeProviderSigner(provider);
+        } catch (e) {
+          console.warn("[sidecar] ack:", e?.message);
+        }
+        this._ack.add(provider);
       }
-      this._ack.add(provider);
-    }
-    const { endpoint } = await broker.inference.getServiceMetadata(provider);
-    const messages = req.messages || [];
-    const content =
-      [...messages].reverse().find((m) => m.role === "user")?.content ||
-      JSON.stringify(messages);
-    const headers = await broker.inference.getRequestHeaders(provider, content);
+      const meta = await broker.inference.getServiceMetadata(provider);
+      const messages = req.messages || [];
+      const content =
+        [...messages].reverse().find((m) => m.role === "user")?.content ||
+        JSON.stringify(messages);
+      const hdrs = await broker.inference.getRequestHeaders(provider, content);
+      return { endpoint: meta.endpoint, headers: hdrs };
+    });
+
+    // Not serialized: the actual inference (5-40s) — the throughput bottleneck.
     const resp = await fetch(`${endpoint}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...headers },
@@ -182,7 +191,11 @@ export class ZerogClient {
     const chatID = resp.headers.get("ZG-Res-Key") || data?.id;
     let verified = false;
     try {
-      verified = await withRetry(() => broker.inference.processResponse(provider, chatID));
+      // Each verify attempt is serialized (nonce-safe); the backoff between
+      // attempts is outside the lock so a slow signature doesn't block others.
+      verified = await withRetry(() =>
+        this._serialize(() => broker.inference.processResponse(provider, chatID))
+      );
     } catch (e) {
       console.warn("[sidecar] processResponse failed:", e?.message);
     }
