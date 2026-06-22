@@ -1,0 +1,35 @@
+name: 0gora
+
+services:
+  zerog:
+    build: ../zerog
+    environment:
+      - PORT=8090
+      - ZEROG_RPC_URL=${ZEROG_RPC_URL:-https://evmrpc.0g.ai}
+      - ZEROG_MODEL=${ZEROG_MODEL:-zai-org/GLM-5-FP8}
+      - ZEROG_MOCK=${ZEROG_MOCK:-false}
+      - ZEROG_PRIVATE_KEY=${ZEROG_PRIVATE_KEY:-}
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.1
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  backend:
+    build: ../backend
+    environment:
+      - ZEROG_BASE_URL=http://zerog:8090/v1
+      - QDRANT_URL=http://qdrant:6333
+    depends_on:
+      - zerog
+      - qdrant
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # web (Next.js) added in task 0.8
+
+volumes:
+  qdrant_data:
