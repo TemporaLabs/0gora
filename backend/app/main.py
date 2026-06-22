@@ -1,13 +1,25 @@
 """0Gora backend — FastAPI RAG over 0G Compute."""
 from __future__ import annotations
 
-from fastapi import FastAPI
+import os
+
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from . import ingest, rag, zerog
 
 app = FastAPI(title="0Gora", version="0.1.1")
+
+# Contribution is locked by default: open ingestion is deferred until the
+# contributor system exists. It is enabled only when CONTRIBUTE_KEY is set in
+# the environment AND the caller presents it via the X-Contribute-Key header.
+CONTRIBUTE_KEY = os.getenv("CONTRIBUTE_KEY", "")
+
+
+def _guard_contribute(key: str | None) -> None:
+    if not CONTRIBUTE_KEY or key != CONTRIBUTE_KEY:
+        raise HTTPException(status_code=403, detail="Contribution is currently closed.")
 
 
 @app.get("/health")
@@ -39,8 +51,9 @@ class ContributeRequest(BaseModel):
 
 
 @app.post("/contribute")
-async def contribute(req: ContributeRequest):
+async def contribute(req: ContributeRequest, x_contribute_key: str | None = Header(default=None)):
     """Community contribute: ingest a URL (single page), a site (recursive crawl), or a sitemap."""
+    _guard_contribute(x_contribute_key)
     if req.mode == "site":
         res = await run_in_threadpool(ingest.ingest_site, req.url, req.bin, req.max_pages)
     elif req.mode == "sitemap":
@@ -57,7 +70,8 @@ class TextRequest(BaseModel):
 
 
 @app.post("/contribute/text")
-async def contribute_text(req: TextRequest):
+async def contribute_text(req: TextRequest, x_contribute_key: str | None = Header(default=None)):
     """Ingest pasted text (e.g. an X post the crawler can't reach)."""
+    _guard_contribute(x_contribute_key)
     n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin)
     return {"source": req.source, "chunks": n}

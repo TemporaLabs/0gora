@@ -70,10 +70,11 @@ docker compose up -d --build          # web :3000 · backend :8000 · qdrant :63
 Prod (TLS): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`.
 
 ## Access, contribution & storage
-- **Access:** the live demo is **public** — anyone with the link can use it (no login).
-- **Contribute (crowdsource, today):** the **+ Contribute** form (or `POST /contribute`) takes a URL → the
-  backend crawls → cleans → chunks → embeds → adds it to the shared knowledge base, instantly retrievable.
-  Open ingestion is the seed of the *agora*; the ownership/attribution layer is on the roadmap.
+- **Access:** the live demo is **public** — anyone can use the chat (no login). It's **read-only**: you can
+  ask questions, but **contribution is closed**.
+- **Contribution (coming):** the ingestion pipeline (`POST /contribute` → crawl → clean → chunk → embed) is
+  built and admin-gated behind a key today. Open, community-owned contribution — with on-chain attribution —
+  is the *agora* on the roadmap; the knowledge base is curated until then.
 - **Where the knowledge lives:** a **Qdrant** vector database (collection `0gora`) — each chunk stored as an
   embedding vector + `{text, source url, bin}`. It is **not** in S3 or a file bucket; it's the vector store.
   The seeded 0G blog + docs were crawled → chunked → embedded into it. *(Roadmap: migrate the corpus to **0G Storage**.)*

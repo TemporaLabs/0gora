@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Contribution is closed until the contributor system ships. Build with
+// NEXT_PUBLIC_CONTRIBUTE=on to expose the Contribute UI again.
+const CONTRIBUTE_ENABLED = process.env.NEXT_PUBLIC_CONTRIBUTE === "on";
+
 type Citation = { n: number; url?: string; bin?: string };
 type Verification = { verified?: boolean; mock?: boolean; model?: string; chatID?: string };
 type Msg = {
@@ -99,9 +103,11 @@ export default function Home() {
             ))}
           </select>
         )}
-        <button className="ghost" onClick={() => setShowContribute(true)}>
-          + Contribute
-        </button>
+        {CONTRIBUTE_ENABLED && (
+          <button className="ghost" onClick={() => setShowContribute(true)}>
+            + Contribute
+          </button>
+        )}
       </div>
 
       <div className="messages">
