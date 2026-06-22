@@ -7,7 +7,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from . import ingest, rag, zerog
+from . import ingest, rag, retrieve, zerog
 
 app = FastAPI(title="0Gora", version="0.1.2")
 
@@ -68,6 +68,24 @@ async def chat(req: ChatRequest):
         return await rag.answer(req.message, req.model)
     except Exception as exc:  # noqa: BLE001 — never surface a raw 500 to the UI
         return {"answer": _friendly_error(exc), "citations": [], "x_0g_verification": None, "error": str(exc)[:200]}
+
+
+class SearchRequest(BaseModel):
+    query: str
+    k: int = 8
+
+
+@app.post("/search")
+async def search(req: SearchRequest):
+    """Raw hybrid retrieval (no LLM) — returns the matching chunks + sources.
+    Used by the MCP `search_0g_knowledge` tool so agents can read the corpus directly."""
+    chunks = await run_in_threadpool(retrieve.hybrid_search, req.query, req.k)
+    return {
+        "query": req.query,
+        "results": [
+            {"text": c.get("text", ""), "url": c.get("url"), "bin": c.get("bin")} for c in chunks
+        ],
+    }
 
 
 class ContributeRequest(BaseModel):
