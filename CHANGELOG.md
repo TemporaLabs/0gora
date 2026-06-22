@@ -10,6 +10,21 @@ Tags mark each release; the newest version is at the top.
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
+## [0.1.4] — 2026-06-22 — Look & feel
+### Added
+- **Landing hero** — empty-state hero with the *agora* as a duotone purple/pink backdrop, the
+  "Ask. Verify. Trust." value prop, and clickable example-prompt chips for a strong first impression.
+- **Markdown rendering** for answers (`react-markdown` + `remark-gfm`) — headings, lists, tables, code
+  blocks, and links now render properly instead of plain text.
+- **Verification seal** — the small badge is now a prominent trust seal showing the TEE attestation,
+  model, and chatID, so the thing that makes 0Gora different is celebrated, not hidden.
+- "Built for agents too — connect over MCP" footer linking the agent surface.
+### Changed
+- **Brand refresh** — gradient ØGora wordmark, 0G pink/purple palette, citation cards, sticky header,
+  animated "Thinking on 0G…" state, and a mobile-responsive layout.
+- **Mock-mode hardening** — the prod overlay pins `ZEROG_MOCK=false`, and the 0G service logs a loud
+  warning if mock is ever enabled, so production can never silently serve unverified answers.
+
 ## [0.1.3] — 2026-06-22 — Agents, throughput, license
 ### Added
 - **MCP service** (`mcp/`) — the agent-facing side of the *agora*. Exposes `ask_0gora`,

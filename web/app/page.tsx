@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Contribution is closed until the contributor system ships. Build with
 // NEXT_PUBLIC_CONTRIBUTE=on to expose the Contribute UI again.
 const CONTRIBUTE_ENABLED = process.env.NEXT_PUBLIC_CONTRIBUTE === "on";
+
+const EXAMPLES = [
+  "What is 0G?",
+  "What is 0G Storage?",
+  "How does TEE verification work?",
+  "Which models can I use?",
+];
 
 type Citation = { n: number; url?: string; bin?: string };
 type Verification = { verified?: boolean; mock?: boolean; model?: string; chatID?: string };
@@ -41,8 +50,8 @@ export default function Home() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
-  async function send() {
-    const q = input.trim();
+  async function send(question?: string) {
+    const q = (question ?? input).trim();
     if (!q || busy) return;
     setInput("");
     setMessages((m) => [...m, { role: "user", content: q }]);
@@ -120,42 +129,76 @@ export default function Home() {
         )}
       </div>
 
-      <div className="messages">
-        {messages.length === 0 && (
-          <div className="muted">
-            Ask anything about the contributed knowledge. Try: <em>“What is 0G?”</em> — answers are
-            generated and verified on 0G Compute.
+      {messages.length === 0 ? (
+        <div className="hero">
+          <div className="hero-bg" />
+          <div className="hero-wash" />
+          <div className="hero-scrim" />
+          <div className="hero-inner">
+            <h1>ØGora</h1>
+            <p className="lead">Ask. Verify. Trust.</p>
+            <p className="sub">
+              A marketplace of knowledge on 0G. Every answer is generated <em>and</em> cryptographically
+              verified inside a 0G TEE — so you can trust where it came from.
+            </p>
+            <div className="chips">
+              {EXAMPLES.map((ex) => (
+                <button key={ex} className="chip" onClick={() => send(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`msg ${m.role}`}>
-            {m.role === "assistant" ? (
-              <>
-                <div className="answer">{m.content}</div>
-                {m.verification && (
-                  <span className="badge" title={`model: ${m.verification.model || ""}\nchatID: ${m.verification.chatID || ""}`}>
-                    ◇ {m.verification.verified ? "Verified on 0G" : "0G (unverified)"}
-                    {m.verification.mock ? " · mock" : ""}
-                  </span>
-                )}
-                {m.citations && m.citations.length > 0 && (
-                  <div className="cites">
-                    {m.citations.map((c) => (
-                      <a key={c.n} className="cite" href={c.url} target="_blank" rel="noreferrer">
-                        [{c.n}] {c.url ? new URL(c.url).hostname : c.bin}
-                      </a>
-                    ))}
+        </div>
+      ) : (
+        <div className="messages">
+          {messages.map((m, i) => (
+            <div key={i} className={`msg ${m.role}`}>
+              {m.role === "assistant" ? (
+                <>
+                  <div className="answer">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
                   </div>
-                )}
-              </>
-            ) : (
-              m.content
-            )}
-          </div>
-        ))}
-        {busy && <div className="muted">Thinking on 0G…</div>}
-        <div ref={endRef} />
-      </div>
+                  {m.verification && (
+                    <div className={`seal ${m.verification.mock ? "mock" : ""}`}>
+                      <span className="mark">{m.verification.verified ? "✓" : "!"}</span>
+                      <span>
+                        <span className="seal-main">
+                          {m.verification.verified ? "Verified on 0G" : "0G — unverified"}
+                          {m.verification.mock ? " · mock" : ""}
+                        </span>
+                        <br />
+                        <span className="seal-sub">
+                          TEE-attested · <b>{m.verification.model || "0G"}</b>
+                          {m.verification.chatID ? ` · ${m.verification.chatID.slice(0, 10)}…` : ""}
+                        </span>
+                      </span>
+                    </div>
+                  )}
+                  {m.citations && m.citations.length > 0 && (
+                    <div className="cites">
+                      {m.citations.map((c) => (
+                        <a key={c.n} className="cite" href={c.url} target="_blank" rel="noreferrer">
+                          <span className="n">[{c.n}]</span>
+                          <span className="host">{c.url ? new URL(c.url).hostname : c.bin}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                m.content
+              )}
+            </div>
+          ))}
+          {busy && (
+            <div className="thinking">
+              <span className="dot" /> Thinking on 0G…
+            </div>
+          )}
+          <div ref={endRef} />
+        </div>
+      )}
 
       <div className="composer">
         <textarea
@@ -169,9 +212,13 @@ export default function Home() {
             }
           }}
         />
-        <button className="primary" onClick={send} disabled={busy}>
+        <button className="primary" onClick={() => send()} disabled={busy}>
           Send
         </button>
+      </div>
+
+      <div className="foot">
+        Built for agents too — connect over <a href="https://github.com/TemporaLabs/0gora/tree/main/mcp" target="_blank" rel="noreferrer">MCP</a>.
       </div>
 
       {showContribute && (

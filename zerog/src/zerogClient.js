@@ -33,7 +33,7 @@ const MOCK_MODELS = ["zai-org/GLM-5-FP8", "glm-5.1", "deepseek-v4-pro", "qwen3.7
 /**
  * Multi-model 0G direct-broker client. Resolves each requested model to its 0G
  * compute provider, runs the wallet-signed + TEE-verified flow, and returns an
- * OpenAI-shaped body + verification. Powers Onyx's model picker over 0G models.
+ * OpenAI-shaped body + verification. Powers 0Gora's model picker over 0G models.
  */
 export class ZerogClient {
   constructor({ rpcUrl, privateKey, defaultModel, mock, allowModels }) {
