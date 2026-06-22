@@ -64,15 +64,17 @@ button.ghost { background: transparent; }
 .answer th, .answer td { border: 1px solid var(--border); padding: 6px 10px; }
 
 /* ---------- verification seal ---------- */
-.seal { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px;
-  padding: 8px 14px 8px 10px; border-radius: 14px; position: relative;
-  background: rgba(146, 0, 225, 0.08); border: 1px solid transparent;
-  background-image: linear-gradient(rgba(146,0,225,0.08), rgba(146,0,225,0.08)), var(--grad);
-  background-origin: border-box; background-clip: padding-box, border-box; }
+/* gradient BORDER over an opaque dark fill, so the seal text stays legible */
+.seal { display: inline-flex; align-items: center; gap: 11px; margin-top: 12px;
+  padding: 9px 16px 9px 10px; border-radius: 14px; border: 1.5px solid transparent;
+  background: linear-gradient(var(--panel), var(--panel)) padding-box, var(--grad) border-box;
+  box-shadow: 0 0 18px rgba(183, 95, 255, 0.18); }
+.seal.mock { box-shadow: none;
+  background: linear-gradient(var(--panel), var(--panel)) padding-box, var(--border) border-box; }
 .seal .mark { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center;
   background: var(--grad); color: #0a0a0f; font-weight: 900; font-size: 15px; box-shadow: 0 0 14px rgba(183, 95, 255, 0.5); }
 .seal.mock .mark { background: #3a3a4a; color: var(--muted); box-shadow: none; }
-.seal .seal-main { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.25; }
+.seal .seal-main { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .seal .seal-sub { font-size: 11px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
 .seal .seal-sub b { color: var(--purple); font-weight: 600; }
 
