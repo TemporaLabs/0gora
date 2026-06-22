@@ -22,10 +22,8 @@ Tags mark each release; the newest version is at the top.
 ### Changed
 - **Inference parallelization** — `chatCompletion` no longer serializes the whole call; only the
   nonce-bound broker steps (ack + `getRequestHeaders`, and each `processResponse` attempt) are serialized,
-  while the slow LLM fetch + verify backoff run concurrently. Measured: 8 concurrent requests **42s → 21s**,
-  all verified — throughput now scales with concurrency instead of one-call-at-a-time.
-### Ops
-- Stopped the retired Onyx stack on the host (freed ~3.1 GiB; volumes preserved).
+  while the slow LLM fetch + verify backoff run concurrently, so throughput scales with concurrency
+  instead of one call at a time.
 
 ## [0.1.2] — 2026-06-22 — Robustness, multi-model, QA
 ### Added

@@ -1,4 +1,4 @@
-// Shared 0Gora MCP tool definitions, used by both the stdio (server.js) and
+// Shared 0Gora MCP tool definitions, used by both the stdio (stdio.js) and
 // HTTP (http.js) transports. Calls the 0Gora API (OGORA_API, default the hosted
 // public API; set to http://backend:8000 when running inside the compose net).
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -20,7 +20,7 @@ async function api(path, init) {
 }
 
 export function createServer() {
-  const server = new McpServer({ name: "0gora", version: "0.1.4" });
+  const server = new McpServer({ name: "0gora", version: "0.1.3" });
 
   server.tool(
     "ask_0gora",
@@ -29,7 +29,7 @@ export function createServer() {
       "Use this when you want a synthesized, source-cited answer you can trust came from a verified model.",
     {
       question: z.string().describe("The question to ask 0Gora"),
-      model: z.string().optional().describe("Optional 0G model id (default: 0GM-1.0-35B-A3B)"),
+      model: z.string().optional().describe("Optional 0G model id; omit to use the deployment's default model"),
     },
     async ({ question, model }) => {
       const d = await api("/chat", {

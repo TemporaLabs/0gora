@@ -15,7 +15,7 @@ about 0G"** and get a verifiable, cited answer. It's evolving toward a **communi
 *agora*) where anyone can contribute knowledge.
 
 ## Why 0G is core to 0Gora
-Every answer is produced by an open model (e.g. `GLM-5-FP8`) running on a **0G compute provider inside a hardware
+Every answer is produced by an open model (e.g. `GLM-5.1-FP8`) running on a **0G compute provider inside a hardware
 TEE**, and the response is **verified on-chain** via `@0glabs/0g-serving-broker`'s `processResponse`. The result:
 
 > **Remove 0G and 0Gora can't answer — and loses the cryptographic verifiability that is its whole point.**
