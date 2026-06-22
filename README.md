@@ -1,7 +1,7 @@
 <h1 align="center">0Gora</h1>
 <p align="center"><em>Verifiable AI answers, computed on 0G — a knowledge engine you can trust.</em></p>
 <p align="center">
-  🌐 <a href="https://0gora.temporalabs.com"><b>Live demo: 0gora.temporalabs.com</b></a> &nbsp;·&nbsp; Built for the <a href="https://0g.ai/arena/zero-cup">0G Zero Cup</a>
+  🌐 <a href="https://0gora.temporalabs.com"><b>Live demo: 0gora.temporalabs.com</b></a> &nbsp;·&nbsp; Built for the <a href="https://0g.ai/arena/zero-cup">0G Zero Cup</a> &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a>
 </p>
 
 ---
