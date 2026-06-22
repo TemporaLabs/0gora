@@ -40,8 +40,21 @@ Tags mark each release; the newest version is at the top.
 - Repository skeleton: `zerog/` (0G compute service), `backend/` (FastAPI RAG), `web/` (Next.js),
   `deployment/` (docker-compose) — with stubs for the full RAG pipeline.
 
-## [Unreleased] — planned (v0.1.3)
-- **MCP service** — `ask_0gora`, `search_0g_knowledge`, `list_models` — so AI agents (e.g. Claude Code) can
-  consume 0Gora's verifiable knowledge; plus a Claude Code skill. Dual-surface: humans → web, agents → MCP.
-- **Inference parallelization** — serialize only the broker nonce step (not the LLM fetch / verify) to lift
-  the current one-call-at-a-time throughput ceiling.
+## [0.1.3] — 2026-06-22 — Agents, throughput, license
+### Added
+- **MCP service** (`mcp/`) — the agent-facing side of the *agora*. A stdio MCP server exposing
+  `ask_0gora`, `search_0g_knowledge`, and `list_models`, so AI agents (e.g. Claude Code) can consume
+  0Gora's **TEE-verified** knowledge. Dual-surface: humans → web, agents → MCP, same verifiable 0G brain.
+- Backend `/search` endpoint — raw hybrid retrieval (no LLM) powering the `search_0g_knowledge` tool.
+- **Apache-2.0 license** (`LICENSE` + `NOTICE`) — chosen for its explicit patent grant and liability
+  disclaimer so anyone can fork 0Gora into their own verifiable knowledge agora and commercialize it.
+### Changed
+- **Inference parallelization** — `chatCompletion` no longer serializes the whole call; only the
+  nonce-bound broker steps (ack + `getRequestHeaders`, and each `processResponse` attempt) are serialized,
+  while the slow LLM fetch + verify backoff run concurrently. Measured: 8 concurrent requests **42s → 21s**,
+  all verified — throughput now scales with concurrency instead of one-call-at-a-time.
+
+## [Unreleased] — planned
+- Remote MCP endpoint on the EC2 (HTTP/SSE) alongside the web app.
+- **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
+- **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
