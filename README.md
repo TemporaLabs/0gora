@@ -26,9 +26,10 @@ That's something a centralized LLM API fundamentally cannot offer. Later phases 
 ## What it does
 - 🔎 **Grounded RAG** — hybrid retrieval (vector + BM25) over a seeded 0G corpus, answers with inline citations.
 - ✅ **Verified on 0G** — per-answer TEE attestation (real `chatID`, on-chain verification).
-- 🧠 **Verifiable 0G models** — answers run on 0G's TEE-verified compute; the picker exposes each funded
-  0G provider model (`GLM-5-FP8` live today; the broker serves many more — GLM, DeepSeek, Qwen, MiniMax — as
-  their providers are funded).
+- 🧠 **4 verifiable 0G models** — answers run on 0G's TEE-attested (`TeeML`) compute. Pick from **0GM**
+  (0G Foundation's own in-house model — the default), **GLM-5.1-FP8**, **DeepSeek-chat-v3**, and
+  **Qwen3.7-Max** — each response cryptographically verified on 0G. *(Only models registered on the direct
+  serving broker with TEE attestation are offered — which is why router-only models like GLM-5.2 aren't listed.)*
 - ➕ **Contribute pipeline** — a URL is crawled, embedded, and instantly retrievable (admin-curated today;
   open community contribution is on the roadmap).
 
