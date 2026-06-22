@@ -93,3 +93,9 @@ Own work built in the tournament window, composed from **open-source libraries**
 (verifiable inference is load-bearing). Design influenced by open-source enterprise-search platforms (e.g.
 [Onyx](https://github.com/onyx-dot-app/onyx), MIT) and the broader RAG ecosystem — **0Gora is an original
 implementation, not a fork.**
+
+## License
+**Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). The 0G corpus seeded here is just a
+demo exhibit; 0Gora is meant to be reused — fork it to build your own verifiable knowledge *agora* for any
+domain. Apache-2.0 is chosen deliberately: it grants an explicit patent license and a clear liability
+disclaimer, so others can adopt and commercialize it with confidence.
