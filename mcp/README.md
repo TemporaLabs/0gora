@@ -1,4 +1,4 @@
-# 0Gora MCP server
+# 0Gora MCP
 
 Expose **0Gora's verifiable 0G knowledge** to AI agents over the [Model Context
 Protocol](https://modelcontextprotocol.io). Every answer is generated **and cryptographically verified on
@@ -6,6 +6,13 @@ Protocol](https://modelcontextprotocol.io). Every answer is generated **and cryp
 
 This is the **agent-facing side of the agora**: humans use [`0gora.temporalabs.com`](https://0gora.temporalabs.com);
 agents use this MCP server. Same verifiable 0G brain.
+
+```
+mcp/
+  server/   the MCP server — tools.js (shared) + stdio.js (local) + http.js (remote)
+  client/   an example MCP client (call 0Gora from your own code)
+  test/     smoke tests for both transports
+```
 
 ## Tools
 | Tool | What it does |
@@ -23,7 +30,7 @@ claude mcp add --transport http 0gora https://0gora.temporalabs.com/mcp
 
 **Or run the stdio server locally:**
 ```bash
-claude mcp add 0gora -- node /path/to/0gora/mcp/src/server.js
+claude mcp add 0gora -- node /path/to/0gora/mcp/server/stdio.js
 ```
 or add to your project's `.mcp.json` (see [`.mcp.json.example`](.mcp.json.example)):
 ```json
@@ -31,7 +38,7 @@ or add to your project's `.mcp.json` (see [`.mcp.json.example`](.mcp.json.exampl
   "mcpServers": {
     "0gora": {
       "command": "node",
-      "args": ["./mcp/src/server.js"],
+      "args": ["./mcp/server/stdio.js"],
       "env": { "OGORA_API": "https://0gora.temporalabs.com/api" }
     }
   }
@@ -40,15 +47,25 @@ or add to your project's `.mcp.json` (see [`.mcp.json.example`](.mcp.json.exampl
 Then ask Claude Code things like *"use 0gora to find out what 0G Storage is"* — it calls `ask_0gora` and
 gets a TEE-verified, cited answer.
 
+## Call it from your own code
+Agents like Claude Code bring their own MCP client — you don't need one. But to query 0Gora programmatically,
+[`client/example.mjs`](client/example.mjs) shows the pattern:
+```bash
+cd mcp && npm install
+npm run client:example -- "What is 0G Storage?"     # connects to the hosted endpoint
+```
+
 ## Config
-- `OGORA_API` — base API URL (default `https://0gora.temporalabs.com/api`). Point it at a local stack
-  (`http://localhost:8000`) to run fully self-hosted.
+- `OGORA_API` — base API URL the server calls (default `https://0gora.temporalabs.com/api`). Point it at a
+  local stack (`http://localhost:8000`) to run fully self-hosted.
+- `MCP_URL` — used by the example client / tests to pick the MCP endpoint.
 
 ## Develop
 ```bash
 cd mcp && npm install
-npm start          # run the stdio server
-npm test           # smoke test all three tools against the live API
+npm start            # stdio server   (server/stdio.js)
+npm run start:http   # remote server  (server/http.js, listens on :8091)
+npm test             # smoke-test all three tools over stdio
 ```
 
 Licensed under Apache-2.0 (see ../LICENSE).

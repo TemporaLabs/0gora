@@ -96,6 +96,14 @@ Built from **open-source libraries**, with **0G doing the verifiable inference**
 [Onyx](https://github.com/onyx-dot-app/onyx) (MIT) and the broader RAG ecosystem. **0Gora was created
 originally for the 0G Zero Cup.**
 
+## Docs
+- [`docs/GUIDE.md`](docs/GUIDE.md) — **how to use 0Gora** — two paths: humans (web app) and AI agents (MCP).
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — components, the answer flow, what "Verified on 0G" means,
+  and the dual human/agent surface.
+- [`docs/MODELS.md`](docs/MODELS.md) — the four models and why each was selected.
+- [`mcp/README.md`](mcp/README.md) — the MCP server + example client for AI agents.
+- [`CHANGELOG.md`](CHANGELOG.md) — version history.
+
 ## License
 **Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). The 0G corpus seeded here is just a
 demo exhibit; 0Gora is meant to be reused — adapt it to build your own verifiable knowledge *agora* for any

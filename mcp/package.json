@@ -4,12 +4,13 @@
   "description": "MCP server for 0Gora — verifiable, TEE-attested 0G knowledge for AI agents",
   "type": "module",
   "bin": {
-    "0gora-mcp": "src/server.js"
+    "0gora-mcp": "server/stdio.js"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "start:http": "node src/http.js",
-    "test": "node test/smoke.mjs"
+    "start": "node server/stdio.js",
+    "start:http": "node server/http.js",
+    "test": "node test/smoke.mjs",
+    "client:example": "node client/example.mjs"
   },
   "license": "Apache-2.0",
   "engines": {

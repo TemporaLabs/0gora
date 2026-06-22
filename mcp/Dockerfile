@@ -2,6 +2,6 @@ FROM node:22-alpine
 WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev --no-fund --no-audit
-COPY src ./src
+COPY server ./server
 EXPOSE 8091
-CMD ["node", "src/http.js"]
+CMD ["node", "server/http.js"]
