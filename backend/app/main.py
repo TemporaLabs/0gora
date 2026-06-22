@@ -34,10 +34,30 @@ async def chat(req: ChatRequest):
 class ContributeRequest(BaseModel):
     url: str
     bin: str = "0g"
+    mode: str = "single"  # single | site | sitemap
+    max_pages: int = 40
 
 
 @app.post("/contribute")
 async def contribute(req: ContributeRequest):
-    """Community contribute: ingest a URL into the knowledge commons."""
-    n = await run_in_threadpool(ingest.ingest_url, req.url, req.bin)
-    return {"url": req.url, "bin": req.bin, "chunks": n}
+    """Community contribute: ingest a URL (single page), a site (recursive crawl), or a sitemap."""
+    if req.mode == "site":
+        res = await run_in_threadpool(ingest.ingest_site, req.url, req.bin, req.max_pages)
+    elif req.mode == "sitemap":
+        res = await run_in_threadpool(ingest.ingest_sitemap, req.url, req.bin, req.max_pages)
+    else:
+        res = {"chunks": await run_in_threadpool(ingest.ingest_url, req.url, req.bin)}
+    return {"url": req.url, "bin": req.bin, "mode": req.mode, **res}
+
+
+class TextRequest(BaseModel):
+    text: str
+    source: str = "paste"
+    bin: str = "0g"
+
+
+@app.post("/contribute/text")
+async def contribute_text(req: TextRequest):
+    """Ingest pasted text (e.g. an X post the crawler can't reach)."""
+    n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin)
+    return {"source": req.source, "chunks": n}
