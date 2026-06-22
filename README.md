@@ -15,7 +15,7 @@ about 0G"** and get a verifiable, cited answer. It's evolving toward a **communi
 *agora*) where anyone can contribute knowledge.
 
 ## Why 0G is core to 0Gora
-Every answer is produced by an open model (e.g. `GLM-5-FP8`) running on a **0G compute provider inside a hardware
+Every answer is produced by an open model (e.g. `GLM-5.1-FP8`) running on a **0G compute provider inside a hardware
 TEE**, and the response is **verified on-chain** via `@0glabs/0g-serving-broker`'s `processResponse`. The result:
 
 > **Remove 0G and 0Gora can't answer — and loses the cryptographic verifiability that is its whole point.**
@@ -54,7 +54,7 @@ Contributors ─► Ingest ─► Chunk + Embed (bge) ─► Qdrant (vector stor
 | `zerog/` | 0G compute service — OpenAI-compatible; runs GLM on 0G via the direct broker + TEE verification |
 | `backend/` | FastAPI — ingestion (URL/site/sitemap/paste), bge embeddings, hybrid retrieval, RAG |
 | `web/` | Next.js chat UI — model picker, citations, "Verified on 0G" badge, Contribute |
-| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*) |
+| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*). Hosted at `/mcp`; or run locally over stdio |
 | `deployment/` | docker-compose (+ prod overlay: nginx + Let's Encrypt) |
 
 ## Stack
@@ -95,6 +95,14 @@ Prod (TLS): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up 
 Built from **open-source libraries**, with **0G doing the verifiable inference**. Design influenced by
 [Onyx](https://github.com/onyx-dot-app/onyx) (MIT) and the broader RAG ecosystem. **0Gora was created
 originally for the 0G Zero Cup.**
+
+## Docs
+- [`docs/GUIDE.md`](docs/GUIDE.md) — **how to use 0Gora** — two paths: humans (web app) and AI agents (MCP).
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — components, the answer flow, what "Verified on 0G" means,
+  and the dual human/agent surface.
+- [`docs/MODELS.md`](docs/MODELS.md) — the four models and why each was selected.
+- [`mcp/README.md`](mcp/README.md) — the MCP server + example client for AI agents.
+- [`CHANGELOG.md`](CHANGELOG.md) — version history.
 
 ## License
 **Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). The 0G corpus seeded here is just a

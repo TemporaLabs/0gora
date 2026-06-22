@@ -2,7 +2,7 @@
   "mcpServers": {
     "0gora": {
       "command": "node",
-      "args": ["./mcp/src/server.js"],
+      "args": ["./mcp/server/stdio.js"],
       "env": {
         "OGORA_API": "https://0gora.temporalabs.com/api"
       }

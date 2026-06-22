@@ -41,5 +41,14 @@ services:
       - "3000:3000"
     restart: unless-stopped
 
+  mcp:
+    build: ../mcp
+    environment:
+      - PORT=8091
+      - OGORA_API=http://backend:8000   # call the backend directly over the compose network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   qdrant_data:

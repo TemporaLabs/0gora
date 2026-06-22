@@ -84,6 +84,18 @@ def test_empty_message_short_circuits():
     assert r.json()["x_0g_verification"] is None
 
 
+def test_search_bounds_enforced():
+    """/search must reject out-of-range k and empty/oversized query (public endpoint)."""
+    from fastapi.testclient import TestClient
+
+    client = TestClient(main.app)
+    assert client.post("/search", json={"query": "0g", "k": 0}).status_code == 422
+    assert client.post("/search", json={"query": "0g", "k": 1000000}).status_code == 422
+    assert client.post("/search", json={"query": "0g", "k": -5}).status_code == 422
+    assert client.post("/search", json={"query": ""}).status_code == 422
+    assert client.post("/search", json={"query": "x" * 5000}).status_code == 422
+
+
 def test_embed_model_load_is_thread_safe():
     """Concurrent cold-start loads must not race (regression: torch meta-tensor crash)."""
     import threading

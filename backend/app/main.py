@@ -5,11 +5,11 @@ import os
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import ingest, rag, retrieve, zerog
 
-app = FastAPI(title="0Gora", version="0.1.2")
+app = FastAPI(title="0Gora", version="0.1.3")
 
 
 @app.on_event("startup")
@@ -71,15 +71,20 @@ async def chat(req: ChatRequest):
 
 
 class SearchRequest(BaseModel):
-    query: str
-    k: int = 8
+    # Bounds are enforced server-side (not just in the MCP client) since /search is
+    # a public endpoint reachable directly: cap k and query length to prevent abuse.
+    query: str = Field(min_length=1, max_length=2000)
+    k: int = Field(default=8, ge=1, le=20)
 
 
 @app.post("/search")
 async def search(req: SearchRequest):
     """Raw hybrid retrieval (no LLM) — returns the matching chunks + sources.
     Used by the MCP `search_0g_knowledge` tool so agents can read the corpus directly."""
-    chunks = await run_in_threadpool(retrieve.hybrid_search, req.query, req.k)
+    try:
+        chunks = await run_in_threadpool(retrieve.hybrid_search, req.query, req.k)
+    except Exception as exc:  # noqa: BLE001 — never surface a raw 500
+        return {"query": req.query, "results": [], "error": str(exc)[:200]}
     return {
         "query": req.query,
         "results": [

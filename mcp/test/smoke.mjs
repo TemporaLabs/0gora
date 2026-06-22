@@ -5,7 +5,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const transport = new StdioClientTransport({
   command: "node",
-  args: ["src/server.js"],
+  args: ["server/stdio.js"],
   env: { ...process.env },
 });
 const client = new Client({ name: "0gora-mcp-smoke", version: "0.0.0" });
