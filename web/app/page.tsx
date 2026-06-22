@@ -175,16 +175,25 @@ export default function Home() {
                       </span>
                     </div>
                   )}
-                  {m.citations && m.citations.length > 0 && (
-                    <div className="cites">
-                      {m.citations.map((c) => (
-                        <a key={c.n} className="cite" href={c.url} target="_blank" rel="noreferrer">
-                          <span className="n">[{c.n}]</span>
-                          <span className="host">{c.url ? new URL(c.url).hostname : c.bin}</span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  {(() => {
+                    // Only show sources the answer actually cites inline ([n]). Hybrid
+                    // retrieval always returns top-k passages, so a non-answer ("I don't
+                    // have that information") would otherwise show unrelated citations.
+                    const used = new Set(
+                      (m.content.match(/\[(\d+)\]/g) || []).map((x) => x.replace(/\D/g, ""))
+                    );
+                    const shown = (m.citations || []).filter((c) => used.has(String(c.n)));
+                    return shown.length > 0 ? (
+                      <div className="cites">
+                        {shown.map((c) => (
+                          <a key={c.n} className="cite" href={c.url} target="_blank" rel="noreferrer">
+                            <span className="n">[{c.n}]</span>
+                            <span className="host">{c.url ? new URL(c.url).hostname : c.bin}</span>
+                          </a>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
                 </>
               ) : (
                 m.content
