@@ -27,7 +27,8 @@ That's something a centralized LLM API fundamentally cannot offer. Later phases 
 - 🔎 **Grounded RAG** — hybrid retrieval (vector + BM25) over a seeded 0G corpus, answers with inline citations.
 - ✅ **Verified on 0G** — per-answer TEE attestation (real `chatID`, on-chain verification).
 - 🧠 **Pick any 0G model** — 13 verifiable models served on 0G (GLM, DeepSeek-V4, Qwen, MiniMax, …).
-- ➕ **Contribute** — paste a URL and it's crawled, embedded, and instantly retrievable.
+- ➕ **Contribute pipeline** — a URL is crawled, embedded, and instantly retrievable (admin-curated today;
+  open community contribution is on the roadmap).
 
 ## Architecture
 ```
