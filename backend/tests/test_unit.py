@@ -82,3 +82,28 @@ def test_empty_message_short_circuits():
     r = client.post("/chat", json={"message": "   "})
     assert r.status_code == 200
     assert r.json()["x_0g_verification"] is None
+
+
+def test_embed_model_load_is_thread_safe():
+    """Concurrent cold-start loads must not race (regression: torch meta-tensor crash)."""
+    import threading
+
+    from app import embed
+
+    embed._model = None  # force cold
+    results, errors = [], []
+
+    def go():
+        try:
+            results.append(embed.load_model())
+        except Exception as e:  # noqa: BLE001
+            errors.append(e)
+
+    threads = [threading.Thread(target=go) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert not errors, f"concurrent load raised: {errors}"
+    assert len({id(m) for m in results}) == 1  # all threads got the same single instance
