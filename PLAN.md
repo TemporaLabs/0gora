@@ -2,7 +2,7 @@
 
 **0Gora — the community-crowdsourced knowledge commons.** An enterprise-grade RAG knowledge assistant whose AI
 inference runs on **0G's decentralized, verifiable compute**, and whose knowledge base is **contributed, curated,
-and owned by the community** (the *agora*) — not locked in a corporate silo.
+and owned by the community** (the *agora*).
 
 Built for the **0G Zero Cup**.
 
