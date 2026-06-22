@@ -14,6 +14,11 @@ const client = new ZerogClient({
   privateKey: process.env.ZEROG_PRIVATE_KEY,
   defaultModel: process.env.ZEROG_MODEL || "zai-org/GLM-5-FP8",
   mock: process.env.ZEROG_MOCK === "true",
+  // ZEROG_MODELS=comma,separated → only advertise funded/working models in the picker.
+  allowModels: (process.env.ZEROG_MODELS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
 });
 
 app.get("/health", (_req, res) =>
