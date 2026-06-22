@@ -6,7 +6,7 @@ and owned by the community** (the *agora*) — not locked in a corporate silo.
 
 Built for the **0G Zero Cup**.
 
-## Why 0G is load-bearing (not a bolt-on)
+## Why 0G is core to 0Gora
 Every answer is **generated on 0G Compute and cryptographically verified inside a hardware TEE** via the 0G
 serving broker (`processResponse`), surfaced as a **"Verified on 0G"** badge on each answer. Remove 0G and
 0Gora literally cannot answer — and loses the verifiability guarantee that is its reason to exist. Later phases
@@ -53,6 +53,6 @@ incentivized contribution**:
 - **"Remove 0G → no brain"**: with 0G Compute disabled, 0Gora can't answer — proving 0G is load-bearing.
 
 ## Prior art / credits
-Design influenced by open-source enterprise-search platforms (e.g., [Onyx](https://github.com/onyx-dot-app/onyx),
-MIT) and the broader RAG ecosystem. **0Gora is an original implementation** — its own code, composed from
-open-source libraries, with 0G Compute as the substrate — not a fork of any product.
+Design influenced by [Onyx](https://github.com/onyx-dot-app/onyx) (MIT) and the broader RAG ecosystem.
+**0Gora was created originally for the 0G Zero Cup** — its own code, composed from open-source libraries,
+with 0G Compute as the substrate.

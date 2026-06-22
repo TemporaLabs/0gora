@@ -14,7 +14,7 @@ Out of the box it's seeded with **0G's own documentation and blog** — so you c
 about 0G"** and get a verifiable, cited answer. It's evolving toward a **community-owned knowledge commons** (the
 *agora*) where anyone can contribute knowledge.
 
-## Why 0G is load-bearing (not a bolt-on)
+## Why 0G is core to 0Gora
 Every answer is produced by an open model (e.g. `GLM-5-FP8`) running on a **0G compute provider inside a hardware
 TEE**, and the response is **verified on-chain** via `@0glabs/0g-serving-broker`'s `processResponse`. The result:
 
@@ -92,13 +92,12 @@ Prod (TLS): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up 
 - **Community commons (future):** open contribution + topic bins + **on-chain attribution & contributor rewards** on 0G Chain.
 
 ## Eligibility (Zero Cup)
-Own work built in the tournament window, composed from **open-source libraries**; **0G does real work**
-(verifiable inference is load-bearing). Design influenced by open-source enterprise-search platforms (e.g.
-[Onyx](https://github.com/onyx-dot-app/onyx), MIT) and the broader RAG ecosystem — **0Gora is an original
-implementation, not a fork.**
+Built from **open-source libraries**, with **0G doing the verifiable inference**. Design influenced by
+[Onyx](https://github.com/onyx-dot-app/onyx) (MIT) and the broader RAG ecosystem. **0Gora was created
+originally for the 0G Zero Cup.**
 
 ## License
 **Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). The 0G corpus seeded here is just a
-demo exhibit; 0Gora is meant to be reused — fork it to build your own verifiable knowledge *agora* for any
+demo exhibit; 0Gora is meant to be reused — adapt it to build your own verifiable knowledge *agora* for any
 domain. Apache-2.0 is chosen deliberately: it grants an explicit patent license and a clear liability
 disclaimer, so others can adopt and commercialize it with confidence.

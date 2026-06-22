@@ -47,7 +47,7 @@ Tags mark each release; the newest version is at the top.
   0Gora's **TEE-verified** knowledge. Dual-surface: humans → web, agents → MCP, same verifiable 0G brain.
 - Backend `/search` endpoint — raw hybrid retrieval (no LLM) powering the `search_0g_knowledge` tool.
 - **Apache-2.0 license** (`LICENSE` + `NOTICE`) — chosen for its explicit patent grant and liability
-  disclaimer so anyone can fork 0Gora into their own verifiable knowledge agora and commercialize it.
+  disclaimer so anyone can adapt 0Gora into their own verifiable knowledge agora and commercialize it.
 ### Changed
 - **Inference parallelization** — `chatCompletion` no longer serializes the whole call; only the
   nonce-bound broker steps (ack + `getRequestHeaders`, and each `processResponse` attempt) are serialized,
