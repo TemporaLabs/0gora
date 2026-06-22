@@ -32,6 +32,8 @@ That's something a centralized LLM API fundamentally cannot offer. Later phases 
   serving broker with TEE attestation are offered — which is why router-only models like GLM-5.2 aren't listed.)*
 - ➕ **Contribute pipeline** — a URL is crawled, embedded, and instantly retrievable (admin-curated today;
   open community contribution is on the roadmap).
+- 🤖 **For humans *and* agents** — humans use the web app; AI agents use the [`mcp/`](mcp/) MCP server
+  (`ask_0gora` / `search_0g_knowledge` / `list_models`) to consume the same TEE-verified knowledge.
 
 ## Architecture
 ```
@@ -52,6 +54,7 @@ Contributors ─► Ingest ─► Chunk + Embed (bge) ─► Qdrant (vector stor
 | `zerog/` | 0G compute service — OpenAI-compatible; runs GLM on 0G via the direct broker + TEE verification |
 | `backend/` | FastAPI — ingestion (URL/site/sitemap/paste), bge embeddings, hybrid retrieval, RAG |
 | `web/` | Next.js chat UI — model picker, citations, "Verified on 0G" badge, Contribute |
+| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*) |
 | `deployment/` | docker-compose (+ prod overlay: nginx + Let's Encrypt) |
 
 ## Stack
