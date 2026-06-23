@@ -12,6 +12,7 @@ const CONTRIBUTE_ENABLED = process.env.NEXT_PUBLIC_CONTRIBUTE === "on";
 // deployment's 0gora.config.json. These defaults mirror the 0G example, so the first
 // paint (and any fetch failure) renders exactly as before — no flash, no regression.
 type InstanceConfig = {
+  name: string;
   logo: string;
   instanceLabel: string;
   hero: { title: string; lead: string; sub: string };
@@ -20,6 +21,7 @@ type InstanceConfig = {
 };
 
 const DEFAULT_CONFIG: InstanceConfig = {
+  name: "0Gora",
   logo: "ØGora",
   instanceLabel: "the 0G agora · an example built on 0Gora",
   hero: {
@@ -251,7 +253,7 @@ export default function Home() {
       </div>
 
       <div className="foot">
-        Built for agents too — connect over <a href="https://github.com/TemporaLabs/0gora/tree/main/mcp" target="_blank" rel="noreferrer">MCP</a>.
+        Built for agents too — connect over <a href="https://github.com/TemporaLabs/0gora/tree/main/src/mcp" target="_blank" rel="noreferrer">MCP</a>.
       </div>
 
       {showContribute && (

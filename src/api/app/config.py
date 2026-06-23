@@ -47,13 +47,22 @@ _DEFAULTS: dict = {
 
 
 def _deep_merge(base: dict, over: dict) -> dict:
-    """Overlay `over` onto `base` recursively; keys absent in `over` keep the default."""
+    """Overlay `over` onto `base` recursively; keys absent in `over` keep the default.
+
+    A malformed config must never break rendering: if the default for a key is a
+    dict (e.g. `hero`) but the override supplies a non-dict, we KEEP the default
+    rather than letting a scalar blank out a structured field downstream.
+    """
     out = dict(base)
     for k, v in over.items():
         if k.startswith("$"):  # JSON-doc comment keys (e.g. "$comment") — ignore.
             continue
-        if isinstance(v, dict) and isinstance(out.get(k), dict):
-            out[k] = _deep_merge(out[k], v)
+        default = out.get(k)
+        if isinstance(default, dict):
+            # Only merge when the override is also a dict; otherwise ignore the
+            # type-mismatched value and keep the structured default.
+            if isinstance(v, dict):
+                out[k] = _deep_merge(default, v)
         elif v is not None:
             out[k] = v
     return out

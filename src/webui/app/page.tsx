@@ -89,7 +89,7 @@ export default function Landing() {
         <nav>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
           <Link href={DOCS_URL}>Docs</Link>
-          <a href={`${GITHUB_URL}/tree/main/mcp`} target="_blank" rel="noreferrer">MCP (for agents)</a>
+          <a href={`${GITHUB_URL}/tree/main/src/mcp`} target="_blank" rel="noreferrer">MCP (for agents)</a>
           <Link href={APP_URL}>The 0G app</Link>
         </nav>
         <span className="lp-foot-note">Built for the 0G Zero Cup</span>

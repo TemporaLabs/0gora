@@ -4,6 +4,11 @@ Run inside the backend image:  pytest -q   (deps: pytest, fastapi TestClient)
 """
 from __future__ import annotations
 
+import json
+import os
+
+import pytest
+
 from app import ingest, main, rag, retrieve
 
 
@@ -94,6 +99,48 @@ def test_search_bounds_enforced():
     assert client.post("/search", json={"query": "0g", "k": -5}).status_code == 422
     assert client.post("/search", json={"query": ""}).status_code == 422
     assert client.post("/search", json={"query": "x" * 5000}).status_code == 422
+
+
+# ---- instance config (v0.2.0 config-driven framework) ---------------------
+def test_config_public_exposes_no_secrets():
+    from app import config
+
+    config.load.cache_clear()
+    pub = config.public()
+    assert set(pub) == {"name", "logo", "instanceLabel", "hero", "examples", "placeholder"}
+    blob = json.dumps(pub).lower()
+    for leaky in ("private", "wallet", "secret", "0x", "zerog_"):
+        assert leaky not in blob, f"/config leaked '{leaky}': {pub}"
+
+
+def test_config_defaults_match_shipped_example():
+    """Guard against drift between config._DEFAULTS and examples/0g/0gora.config.json."""
+    path = os.path.join(os.path.dirname(__file__), "../../../examples/0g/0gora.config.json")
+    if not os.path.exists(path):
+        pytest.skip("example config not in build context (runs in repo checkout / CI)")
+    from app import config
+
+    with open(path, encoding="utf-8") as f:
+        ex = json.load(f)
+    for k in ("name", "logo", "instanceLabel", "hero", "examples", "placeholder"):
+        assert config._DEFAULTS[k] == ex[k], f"_DEFAULTS[{k}] drifted from the shipped example"
+
+
+def test_config_malformed_value_keeps_structured_default(tmp_path):
+    """A non-dict 'hero' in a user config must not blank the structured default (page would render an empty <h1>)."""
+    from app import config
+
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"hero": "oops", "name": "Custom"}')
+    config.load.cache_clear()
+    os.environ["OGORA_CONFIG"] = str(bad)
+    try:
+        c = config.load()
+        assert isinstance(c["hero"], dict) and "title" in c["hero"]  # default kept, not blanked
+        assert c["name"] == "Custom"  # well-typed scalar override still applied
+    finally:
+        os.environ.pop("OGORA_CONFIG", None)
+        config.load.cache_clear()
 
 
 def test_embed_model_load_is_thread_safe():

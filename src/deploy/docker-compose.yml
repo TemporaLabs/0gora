@@ -23,6 +23,11 @@ services:
     environment:
       - ZEROG_BASE_URL=http://zerog:8090/v1
       - QDRANT_URL=http://qdrant:6333
+      # Backend-scoped knobs. Listed here (not just in .env) so an --env-file value
+      # actually reaches the container: CONTRIBUTE_KEY opens /contribute (seed.sh),
+      # RELEVANCE_THRESHOLD tunes the corpus-relevance gate. Empty key = closed.
+      - CONTRIBUTE_KEY=${CONTRIBUTE_KEY:-}
+      - RELEVANCE_THRESHOLD=${RELEVANCE_THRESHOLD:-0.70}
     depends_on:
       - zerog
       - qdrant
