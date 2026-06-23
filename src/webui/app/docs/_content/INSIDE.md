@@ -37,7 +37,7 @@ cd 0gora
 cp examples/0g/.env.example examples/0g/.env   # set your 0G wallet key (or keep ZEROG_MOCK=true)
 docker compose -f src/deploy/docker-compose.yml \
                -f examples/0g/compose.override.yml \
-               --env-file examples/0g/.env up -d
+               --env-file examples/0g/.env up -d --build
 ```
 
 That brings up the RAG API, the 0G inference service, the MCP server, the web app, and Qdrant. The instance's

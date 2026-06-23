@@ -11,8 +11,8 @@ const DEST = path.resolve(process.cwd(), "app/docs/_content");
 const FILES = ["README.md", "WHY-0G.md", "INSIDE.md"];
 
 if (!fs.existsSync(SRC)) {
-  // In the Docker build context ../docs doesn't exist — keep the committed copy.
-  console.log("[sync-docs] ../docs not found; using committed copy");
+  // In the Docker build context ../../docs doesn't exist — keep the committed copy.
+  console.log("[sync-docs] ../../docs not found; using committed copy");
   process.exit(0);
 }
 fs.mkdirSync(DEST, { recursive: true });

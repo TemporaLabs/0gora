@@ -72,6 +72,10 @@ docker compose up -d --build          # web :3000 · backend :8000 · qdrant :63
 #            -d '{"url":"https://0g.ai/blog","mode":"site","max_pages":30}'
 ```
 
+This runs the framework with its **built-in 0G defaults**. To run the configured 0G example
+— its branding, example questions, and seed corpus from `examples/0g/0gora.config.json` — use the
+example overlay instead: see [`examples/0g/`](examples/0g/README.md).
+
 **Real mode (0G mainnet):** set `ZEROG_MOCK=false` + `ZEROG_PRIVATE_KEY` (a funded 0G wallet) in
 `src/deploy/.env`, confirm the live model id with `cd src/inference && npm i && npm run probe`, then bring up.
 Prod (TLS): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`.

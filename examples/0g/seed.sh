@@ -21,16 +21,34 @@ command -v jq >/dev/null || { echo "error: jq is required" >&2; exit 1; }
 count="$(jq '.corpus.seeds | length' "$CONFIG")"
 echo "Seeding $count source(s) into $API …"
 
-jq -c '.corpus.seeds[]' "$CONFIG" | while read -r seed; do
+# Loop in the main shell (process substitution, not a pipe) so a failure can set
+# `fail` and we exit non-zero — a piped `while` runs in a subshell and loses that.
+fail=0
+while read -r seed; do
   url="$(jq -r '.url' <<<"$seed")"
   mode="$(jq -r '.mode // "single"' <<<"$seed")"
   max_pages="$(jq -r '.max_pages // 40' <<<"$seed")"
   echo "  → $url ($mode, max $max_pages)"
-  curl -sS -X POST "$API/contribute" \
-    -H "content-type: application/json" \
-    -H "x-contribute-key: $CONTRIBUTE_KEY" \
-    -d "{\"url\":\"$url\",\"mode\":\"$mode\",\"max_pages\":$max_pages}" \
-    && echo
-done
+  # Build the JSON body with jq so a url containing quotes/backslashes can't
+  # produce malformed JSON, and max_pages is always a real number.
+  payload="$(jq -nc --arg url "$url" --arg mode "$mode" --argjson max_pages "$max_pages" \
+    '{url: $url, mode: $mode, max_pages: $max_pages}')"
+  # --fail-with-body: curl exits non-zero on HTTP 4xx/5xx (e.g. a 403 from a
+  # mismatched CONTRIBUTE_KEY) while still printing the error body. Without it a
+  # fully-rejected seed would print "Done." and exit 0 — a silent no-op.
+  if curl -sS --fail-with-body -X POST "$API/contribute" \
+       -H "content-type: application/json" \
+       -H "x-contribute-key: $CONTRIBUTE_KEY" \
+       -d "$payload"; then
+    echo
+  else
+    echo >&2 "  ✗ failed to seed $url (HTTP error — check CONTRIBUTE_KEY matches the backend and that $API is reachable)"
+    fail=1
+  fi
+done < <(jq -c '.corpus.seeds[]' "$CONFIG")
 
+if [[ "$fail" -ne 0 ]]; then
+  echo >&2 "Done with errors — one or more sources failed to seed."
+  exit 1
+fi
 echo "Done."

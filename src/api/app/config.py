@@ -21,6 +21,8 @@ from functools import lru_cache
 
 # Built-in defaults — mirror examples/0g/0gora.config.json so the framework behaves
 # identically to the shipped 0G instance even when no config file is mounted.
+# (corpus.seeds is intentionally empty here, unlike the example: the backend never
+# reads it — seed.sh reads the config JSON directly — so the default needs no seeds.)
 _DEFAULTS: dict = {
     "name": "0Gora",
     "logo": "ØGora",
