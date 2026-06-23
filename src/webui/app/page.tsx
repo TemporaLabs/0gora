@@ -34,6 +34,14 @@ export default function Landing() {
             In Greek, <i>agora</i> (ἀγορά) means a <b>gathering place</b> — an assembly, a marketplace. ØGora is
             a marketplace of <b>knowledge</b>, powered by the <b>0G</b> stack — with answers you can trust.
           </p>
+          <div className="lp-cta">
+            <a className="btn btn-primary" href={GITHUB_URL} target="_blank" rel="noreferrer">
+              Build your 0Gora <span className="arr">→</span>
+            </a>
+            <Link className="btn btn-ghost" href={DOCS_URL}>
+              Read the docs
+            </Link>
+          </div>
         </div>
       </section>
 
