@@ -33,5 +33,18 @@
     "$comment": "Optional system-prompt overrides. null = use the framework default, which is templated from `name` + `ecosystem` above.",
     "grounded": null,
     "chat": null
+  },
+
+  "models": {
+    "$comment": "Auto model routing (v0.2.1). `auto` defaults the picker to Auto; the framework then picks the best model per query. `default` is the safe model used for the classifier fallback + cascade when a provider is unavailable; `router` is the (cheap, unverified) model that does the classification. `roster` lists selectable models with their lanes — ids MUST match the funded ZEROG_MODELS allowlist in .env. To tune routing, edit this block; no code change.",
+    "auto": true,
+    "default": "0gm",
+    "router": "0gm",
+    "roster": [
+      { "id": "0gm", "tier": "fast", "strengths": ["general", "short", "greetings"] },
+      { "id": "zai-org/GLM-5.1-FP8", "tier": "strong", "strengths": ["reasoning", "analysis"] },
+      { "id": "deepseek-v4-pro", "tier": "strong", "strengths": ["code", "math", "logic"] },
+      { "id": "qwen3.7-max", "tier": "large", "strengths": ["multilingual", "long-context"] }
+    ]
   }
 }
