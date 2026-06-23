@@ -45,6 +45,12 @@ branding, example questions, and seed corpus come from `examples/0g/0gora.config
 runtime. Seed the corpus with `examples/0g/seed.sh`. Add `-f src/deploy/docker-compose.prod.yml` for TLS in
 production.
 
+**Optional voice input.** Off by default. To enable: set `"voice": { "enabled": true }` in
+`0gora.config.json` and deploy with the `voice` compose profile (`--profile voice`, or
+`COMPOSE_PROFILES=voice` in `.env`). That runs the self-hosted [`src/stt`](https://github.com/TemporaLabs/0gora/tree/main/src/stt)
+service (`faster-whisper`) — the mic then transcribes on-box (works in any browser, audio never leaves the
+stack). Without the profile, nothing voice-related is built or run, so the default deploy carries zero footprint.
+
 **Found your own:** the fastest path is the scaffolder — `npm create 0gora@latest my-agora` clones the
 framework and generates a configured `examples/<slug>/` for you. (By hand: copy `examples/0g` to
 `examples/<your-topic>`, edit `0gora.config.json` and `.env`, bring it up with your folder's overlay.) Same
