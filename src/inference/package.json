@@ -1,6 +1,6 @@
 {
   "name": "0gora-zerog",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "0Gora 0G compute service: OpenAI-compatible endpoint running GLM on 0G Compute via the direct broker with TEE verification.",
