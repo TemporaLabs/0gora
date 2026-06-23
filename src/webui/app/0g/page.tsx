@@ -122,7 +122,9 @@ export default function Home() {
         setVoiceErr("Microphone blocked — allow mic access for this site (check the address-bar icon), then tap the mic again.");
       else if (err === "no-speech") setVoiceErr("Didn't catch that — tap the mic and speak.");
       else if (err === "audio-capture") setVoiceErr("No microphone found.");
-      else if (err && err !== "aborted") setVoiceErr("Voice input error — try again.");
+      else if (err === "network")
+        setVoiceErr("Browser voice service unreachable — this usually means a Chromium build that can't reach Google's speech API. Try official Google Chrome, or just type your question.");
+      else if (err && err !== "aborted") setVoiceErr(`Voice input error (${err}) — try again, or type your question.`);
     };
     recogRef.current = r;
     setVoiceOK(true);
