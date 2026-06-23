@@ -107,7 +107,7 @@ def test_config_public_exposes_no_secrets():
 
     config.load.cache_clear()
     pub = config.public()
-    assert set(pub) == {"name", "logo", "instanceLabel", "hero", "examples", "placeholder"}
+    assert set(pub) == {"name", "logo", "instanceLabel", "hero", "examples", "placeholder", "voice"}
     blob = json.dumps(pub).lower()
     for leaky in ("private", "wallet", "secret", "0x", "zerog_"):
         assert leaky not in blob, f"/config leaked '{leaky}': {pub}"

@@ -21,6 +21,9 @@
 
   "placeholder": "Ask 0Gora…",
 
+  "$comment_voice": "Voice input is OPT-IN. Setting enabled=true shows the mic and posts audio to the self-hosted STT service (/transcribe) — works in every browser, audio stays on-box. You must ALSO run the STT service by deploying with the `voice` compose profile (COMPOSE_PROFILES=voice in .env, or --profile voice). The framework default is voice off.",
+  "voice": { "enabled": true },
+
   "corpus": {
     "$comment": "Seed sources for this instance's knowledge base, ingested via POST /contribute (see seed.sh). The live corpus is 0G's docs + blog, the per-model pages on the 0G Private Cloud (pc.0g.ai/models — specs, context window, pricing), plus 0Gora's own /docs so the agora can answer questions about itself (e.g. Auto routing).",
     "seeds": [

@@ -18,6 +18,7 @@ type InstanceConfig = {
   hero: { title: string; lead: string; sub: string };
   examples: string[];
   placeholder: string;
+  voice?: { enabled?: boolean };
 };
 
 const DEFAULT_CONFIG: InstanceConfig = {
@@ -36,6 +37,7 @@ const DEFAULT_CONFIG: InstanceConfig = {
     "How does TEE verification work?",
   ],
   placeholder: "Ask 0Gora…",
+  voice: { enabled: false },
 };
 
 type Citation = { n: number; url?: string; bin?: string };
@@ -74,10 +76,11 @@ export default function Home() {
   const [contributeUrl, setContributeUrl] = useState("");
   const [contributeMsg, setContributeMsg] = useState("");
   const [listening, setListening] = useState(false);
-  const [voiceOK, setVoiceOK] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [voiceErr, setVoiceErr] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
-  const recogRef = useRef<any>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     fetch("/api/models")
@@ -99,69 +102,57 @@ export default function Home() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
 
-  // Voice input via the Web Speech API (Chrome/Edge). The mic only shows when supported.
-  useEffect(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
-    const r = new SR();
-    r.lang = "en-US";
-    r.interimResults = true;
-    r.continuous = false;
-    r.onresult = (e: any) => {
-      setVoiceErr("");
-      const t = Array.from(e.results)
-        .map((res: any) => res[0]?.transcript || "")
-        .join("");
-      setInput(t);
-    };
-    r.onend = () => setListening(false);
-    r.onerror = (e: any) => {
-      setListening(false);
-      const err = e?.error;
-      if (err === "not-allowed" || err === "service-not-allowed")
-        setVoiceErr("Microphone blocked — allow mic access for this site (check the address-bar icon), then tap the mic again.");
-      else if (err === "no-speech") setVoiceErr("Didn't catch that — tap the mic and speak.");
-      else if (err === "audio-capture") setVoiceErr("No microphone found.");
-      else if (err === "network")
-        setVoiceErr("Browser voice service unreachable — this usually means a Chromium build that can't reach Google's speech API. Try official Google Chrome, or just type your question.");
-      else if (err && err !== "aborted") setVoiceErr(`Voice input error (${err}) — try again, or type your question.`);
-    };
-    recogRef.current = r;
-    setVoiceOK(true);
-    return () => {
-      try {
-        r.abort();
-      } catch {
-        /* noop */
-      }
-    };
-  }, []);
-
-  function toggleVoice() {
-    const r = recogRef.current;
-    if (!r) return;
+  // Voice input via MediaRecorder → the self-hosted STT service (/transcribe). Works in
+  // every browser (Chrome/Brave/Firefox/Safari) and the audio stays on-box — unlike the
+  // browser Web Speech API, which is Chrome-only and ships audio to Google. The mic shows
+  // only when this instance opted into voice (cfg.voice.enabled + the `voice` profile).
+  async function toggleVoice() {
+    if (transcribing) return;
     if (listening) {
       try {
-        r.stop();
+        recorderRef.current?.stop(); // fires onstop → transcribe
       } catch {
         /* noop */
       }
-      setListening(false);
-    } else {
-      setVoiceErr("");
-      setInput("");
-      try {
-        r.start();
-        setListening(true);
-      } catch {
-        // start() throws if a prior session is still winding down — reset and let the user retry.
-        try {
-          r.abort();
-        } catch {
-          /* noop */
-        }
+      return;
+    }
+    setVoiceErr("");
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setVoiceErr("This browser can't record audio. Try a recent Chrome/Firefox/Safari.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size) chunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
         setListening(false);
-      }
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+        if (!blob.size) return;
+        setTranscribing(true);
+        try {
+          const fd = new FormData();
+          fd.append("audio", blob, "clip.webm");
+          const r = await fetch("/transcribe", { method: "POST", body: fd });
+          if (!r.ok) throw new Error(String(r.status));
+          const d = await r.json();
+          if (d.text) setInput((prev) => (prev ? `${prev} ${d.text}` : d.text));
+          else setVoiceErr("Didn't catch that — tap the mic and try again.");
+        } catch {
+          setVoiceErr("Couldn't transcribe — try again, or type your question.");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      recorderRef.current = mr;
+      mr.start();
+      setListening(true);
+    } catch {
+      setVoiceErr("Microphone blocked — allow mic access for this site (check the address-bar icon), then tap the mic again.");
     }
   }
 
@@ -350,7 +341,13 @@ export default function Home() {
       <div className="composer">
         <textarea
           value={input}
-          placeholder={listening ? "Listening… speak now (tap the mic to stop)" : cfg.placeholder}
+          placeholder={
+            listening
+              ? "Listening… speak now (tap the mic to stop)"
+              : transcribing
+                ? "Transcribing…"
+                : cfg.placeholder
+          }
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -359,15 +356,15 @@ export default function Home() {
             }
           }}
         />
-        {voiceOK && (
+        {cfg.voice?.enabled && (
           <button
             className={`mic${listening ? " rec" : ""}`}
             onClick={toggleVoice}
-            disabled={busy}
-            title={listening ? "Stop voice input" : "Voice input"}
+            disabled={busy || transcribing}
+            title={listening ? "Stop & transcribe" : transcribing ? "Transcribing…" : "Voice input"}
             aria-label="Voice input"
           >
-            🎤
+            {transcribing ? "…" : "🎤"}
           </button>
         )}
         <button className="primary" onClick={() => send()} disabled={busy}>

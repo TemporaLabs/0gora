@@ -55,5 +55,20 @@ services:
       - backend
     restart: unless-stopped
 
+  # OPTIONAL self-hosted speech-to-text (faster-whisper). Gated behind the `voice`
+  # profile: a default `docker compose up` NEVER builds, pulls, or runs it — zero
+  # footprint. An instance opts in by deploying with `--profile voice` (see
+  # examples/0g, which sets COMPOSE_PROFILES=voice). nginx proxies /transcribe here.
+  stt:
+    build:
+      context: ../stt
+      args:
+        STT_MODEL: ${STT_MODEL:-base}
+    environment:
+      - STT_MODEL=${STT_MODEL:-base}
+      - STT_LANG=${STT_LANG:-}
+    profiles: ["voice"]
+    restart: unless-stopped
+
 volumes:
   qdrant_data:
