@@ -10,6 +10,16 @@ Tags mark each release; the newest version is at the top.
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
+## [0.1.5] — 2026-06-23 — The public square
+### Added
+- **Landing page** at `/` — explains 0Gora as a community-crowdsourced commons / public square of
+  verifiable knowledge: *create any town square, for anything, for anyone — human or agent.* Agora hero
+  with a staggered pop-in animation, a "Build your 0Gora today" GitHub CTA, and a docs CTA.
+- **The chat moved to `/0g`** — reframed as the live example: the *0G 0Gora*, a knowledge base about 0G
+  itself. The landing's "Open the 0G 0Gora app" button links to it.
+- **GitBook-ready docs** — `docs/README.md` overview, `docs/SUMMARY.md`, and `.gitbook.yaml` so the docs
+  can be rendered by a GitHub-synced GitBook. Social/OG preview image wired up.
+
 ## [0.1.4] — 2026-06-22 — Look & feel
 ### Added
 - **Landing hero** — empty-state hero with the *agora* as a duotone purple/pink backdrop, the

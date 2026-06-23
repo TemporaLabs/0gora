@@ -1,0 +1,24 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="0Gora on 0G" id="zg-arch">
+    <mxGraphModel dx="900" dy="520" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="t" value="0Gora, built on 0G — only 0G Compute is load-bearing today" style="text;html=1;fontSize=18;fontStyle=1;fontColor=#EDEDF2;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="820" height="30" as="geometry"/></mxCell>
+        <mxCell id="humans" value="Humans&#10;web · / and /0g" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="1"><mxGeometry x="50" y="70" width="200" height="48" as="geometry"/></mxCell>
+        <mxCell id="agents" value="AI agents&#10;via MCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="1"><mxGeometry x="250" y="70" width="200" height="48" as="geometry"/></mxCell>
+        <mxCell id="app" value="0GORA — THE APP (the framework)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#12121B;strokeColor=#3A2A55;fontColor=#C9A9FF;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="150" width="820" height="196" as="geometry"/></mxCell>
+        <mxCell id="webui" value="Web UI&#10;/ landing · /0g chat · /docs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="app"><mxGeometry x="18" y="42" width="184" height="132" as="geometry"/></mxCell>
+        <mxCell id="mcp" value="MCP server&#10;agent surface&#10;ask · search · models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="app"><mxGeometry x="218" y="42" width="184" height="132" as="geometry"/></mxCell>
+        <mxCell id="rag" value="RAG engine&#10;hybrid retrieve + cite" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="app"><mxGeometry x="418" y="42" width="184" height="132" as="geometry"/></mxCell>
+        <mxCell id="qdrant" value="Vector store&#10;Qdrant&#10;(off-chain, today)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#26263A;fontColor=#EDEDF2;" vertex="1" parent="app"><mxGeometry x="618" y="42" width="184" height="132" as="geometry"/></mxCell>
+        <mxCell id="compute" value="0G Compute&#10;verified inference in a TEE (TeeML)&#10;✓ LOAD-BEARING — remove it and 0Gora can't answer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#B75FFF;strokeWidth=2;fontColor=#EDEDF2;" vertex="1" parent="1"><mxGeometry x="58" y="390" width="520" height="80" as="geometry"/></mxCell>
+        <mxCell id="zgstore" value="0G Storage&#10;decentralized corpus&#10;roadmap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#14141C;strokeColor=#FFB74D;dashed=1;fontColor=#EDEDF2;" vertex="1" parent="1"><mxGeometry x="600" y="390" width="240" height="80" as="geometry"/></mxCell>
+        <mxCell id="e1" style="endArrow=block;html=1;strokeColor=#B75FFF;" edge="1" parent="1" source="humans" target="webui"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;strokeColor=#B75FFF;" edge="1" parent="1" source="agents" target="mcp"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="inference · verified" style="endArrow=block;html=1;strokeColor=#B75FFF;fontColor=#C9A9FF;" edge="1" parent="1" source="rag" target="compute"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="roadmap" style="endArrow=block;html=1;strokeColor=#FFB74D;dashed=1;fontColor=#FFB74D;" edge="1" parent="1" source="qdrant" target="zgstore"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

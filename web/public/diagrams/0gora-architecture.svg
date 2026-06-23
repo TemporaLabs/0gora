@@ -1,0 +1,68 @@
+<svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff3fa4"/><stop offset="0.55" stop-color="#b75fff"/><stop offset="1" stop-color="#9200e1"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#b75fff"/>
+    </marker>
+    <marker id="arrd" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#ffb74d"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="500" rx="16" fill="#0f0f17"/>
+  <text x="40" y="40" fill="#ededf2" font-size="26" font-weight="800">0Gora, built on 0G</text>
+  <text x="40" y="64" fill="#9a9ab0" font-size="14">Humans and agents share one verifiable brain. Only 0G Compute is load-bearing today.</text>
+
+  <!-- who -->
+  <rect x="50" y="80" width="200" height="48" rx="11" fill="#14141c" stroke="#26263a"/>
+  <text x="150" y="103" fill="#ededf2" font-size="14" font-weight="700" text-anchor="middle">Humans</text>
+  <text x="150" y="120" fill="#9a9ab0" font-size="11.5" text-anchor="middle">web · / and /0g</text>
+  <rect x="250" y="80" width="200" height="48" rx="11" fill="#14141c" stroke="#26263a"/>
+  <text x="350" y="103" fill="#ededf2" font-size="14" font-weight="700" text-anchor="middle">AI agents</text>
+  <text x="350" y="120" fill="#9a9ab0" font-size="11.5" text-anchor="middle">via MCP</text>
+  <line x1="150" y1="128" x2="150" y2="156" stroke="#b75fff" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="350" y1="128" x2="350" y2="156" stroke="#b75fff" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 0Gora app -->
+  <rect x="40" y="158" width="820" height="196" rx="14" fill="#12121b" stroke="#3a2a55"/>
+  <text x="58" y="182" fill="#c9a9ff" font-size="13" font-weight="800" letter-spacing="1">0GORA — THE APP (the framework)</text>
+  <g>
+    <rect x="58" y="200" width="184" height="132" rx="11" fill="#14141c" stroke="#26263a"/>
+    <text x="150" y="232" fill="#ededf2" font-size="14.5" font-weight="700" text-anchor="middle">Web UI</text>
+    <text x="150" y="256" fill="#9a9ab0" font-size="11.5" text-anchor="middle">/ landing</text>
+    <text x="150" y="274" fill="#9a9ab0" font-size="11.5" text-anchor="middle">/0g chat · /docs</text>
+
+    <rect x="258" y="200" width="184" height="132" rx="11" fill="#14141c" stroke="#26263a"/>
+    <text x="350" y="232" fill="#ededf2" font-size="14.5" font-weight="700" text-anchor="middle">MCP server</text>
+    <text x="350" y="256" fill="#9a9ab0" font-size="11.5" text-anchor="middle">agent surface</text>
+    <text x="350" y="274" fill="#9a9ab0" font-size="11.5" text-anchor="middle">ask · search · models</text>
+
+    <rect x="458" y="200" width="184" height="132" rx="11" fill="#14141c" stroke="#26263a"/>
+    <text x="550" y="232" fill="#ededf2" font-size="14.5" font-weight="700" text-anchor="middle">RAG engine</text>
+    <text x="550" y="256" fill="#9a9ab0" font-size="11.5" text-anchor="middle">hybrid retrieve</text>
+    <text x="550" y="274" fill="#9a9ab0" font-size="11.5" text-anchor="middle">+ cite</text>
+
+    <rect x="658" y="200" width="184" height="132" rx="11" fill="#14141c" stroke="#26263a"/>
+    <text x="750" y="232" fill="#ededf2" font-size="14.5" font-weight="700" text-anchor="middle">Vector store</text>
+    <text x="750" y="256" fill="#9a9ab0" font-size="11.5" text-anchor="middle">Qdrant</text>
+    <text x="750" y="274" fill="#9a9ab0" font-size="11.5" text-anchor="middle">(off-chain, today)</text>
+  </g>
+
+  <!-- arrows to 0G -->
+  <line x1="550" y1="354" x2="550" y2="396" stroke="#b75fff" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="560" y="380" fill="#c9a9ff" font-size="11.5" font-weight="600">inference</text>
+  <line x1="750" y1="354" x2="750" y2="396" stroke="#ffb74d" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrd)"/>
+  <text x="760" y="380" fill="#ffb74d" font-size="11.5" font-weight="600">roadmap</text>
+
+  <!-- 0G layer -->
+  <rect x="58" y="398" width="520" height="80" rx="13" fill="#14141c" stroke="url(#g)" stroke-width="2"/>
+  <text x="318" y="428" fill="#ededf2" font-size="16" font-weight="800" text-anchor="middle">0G Compute</text>
+  <text x="318" y="450" fill="#c9a9ff" font-size="12.5" text-anchor="middle">verified inference in a TEE (TeeML)</text>
+  <text x="318" y="468" fill="#2fffc3" font-size="11.5" font-weight="700" text-anchor="middle">✓ LOAD-BEARING — remove it and 0Gora can't answer</text>
+
+  <rect x="600" y="398" width="240" height="80" rx="13" fill="#14141c" stroke="#ffb74d" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="720" y="428" fill="#ededf2" font-size="16" font-weight="800" text-anchor="middle">0G Storage</text>
+  <text x="720" y="450" fill="#9a9ab0" font-size="12.5" text-anchor="middle">decentralized corpus</text>
+  <text x="720" y="468" fill="#ffb74d" font-size="11.5" font-weight="700" text-anchor="middle">roadmap</text>
+</svg>
