@@ -62,6 +62,7 @@ button.ghost { background: transparent; }
   color: var(--muted); }
 .answer table { border-collapse: collapse; margin: 0 0 10px; font-size: 14px; }
 .answer th, .answer td { border: 1px solid var(--border); padding: 6px 10px; }
+.answer img { max-width: 100%; height: auto; display: block; margin: 14px 0; border-radius: 12px; border: 1px solid var(--border); }
 
 /* ---------- verification seal ---------- */
 /* gradient BORDER over an opaque dark fill, so the seal text stays legible */
