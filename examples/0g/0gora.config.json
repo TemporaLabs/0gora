@@ -22,10 +22,11 @@
   "placeholder": "Ask 0Gora…",
 
   "corpus": {
-    "$comment": "Seed sources for this instance's knowledge base, ingested via POST /contribute (see seed.sh). The live corpus is 0G's docs + blog.",
+    "$comment": "Seed sources for this instance's knowledge base, ingested via POST /contribute (see seed.sh). The live corpus is 0G's docs + blog, plus 0Gora's own /docs so the agora can answer questions about itself (e.g. Auto routing).",
     "seeds": [
       { "url": "https://0g.ai/blog", "mode": "site", "max_pages": 30 },
-      { "url": "https://docs.0g.ai", "mode": "site", "max_pages": 60 }
+      { "url": "https://docs.0g.ai", "mode": "site", "max_pages": 60 },
+      { "url": "https://0gora.temporalabs.com/docs", "mode": "single", "max_pages": 1 }
     ]
   },
 
