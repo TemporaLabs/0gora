@@ -29,7 +29,10 @@ export function createServer() {
       "Use this when you want a synthesized, source-cited answer you can trust came from a verified model.",
     {
       question: z.string().describe("The question to ask 0Gora"),
-      model: z.string().optional().describe("Optional 0G model id; omit to use the deployment's default model"),
+      model: z
+        .string()
+        .optional()
+        .describe('Optional 0G model id; omit (or pass "auto") to let 0Gora auto-route to the best model per query'),
     },
     async ({ question, model }) => {
       const d = await api("/chat", {
@@ -39,10 +42,16 @@ export function createServer() {
       });
       const v = d.x_0g_verification || {};
       const cites = (d.citations || []).map((c) => `  [${c.n}] ${c.url || c.bin || ""}`).join("\n");
+      // When the model was auto-picked, the API returns `routing` — surface which
+      // model answered and why, so an agent has the same transparency as the web seal.
+      const route = d.routing?.chosen
+        ? `Auto routed to ${d.routing.chosen}${d.routing.reason ? ` (${d.routing.reason})` : ""}`
+        : "";
       const text = [
         d.answer || "(no answer)",
         "",
         `Verified on 0G: ${v.verified ? "✓ yes" : "✗ no"}  (model: ${v.model || "?"}, chatID: ${v.chatID || "?"})`,
+        route,
         cites ? `Sources:\n${cites}` : "",
       ]
         .filter(Boolean)

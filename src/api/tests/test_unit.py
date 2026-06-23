@@ -105,9 +105,9 @@ def test_search_bounds_enforced():
 def test_config_public_exposes_no_secrets():
     from app import config
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     pub = config.public()
-    assert set(pub) == {"name", "logo", "instanceLabel", "hero", "examples", "placeholder"}
+    assert set(pub) == {"name", "logo", "instanceLabel", "hero", "examples", "placeholder", "voice"}
     blob = json.dumps(pub).lower()
     for leaky in ("private", "wallet", "secret", "0x", "zerog_"):
         assert leaky not in blob, f"/config leaked '{leaky}': {pub}"
@@ -151,7 +151,7 @@ def test_models_block_matches_example():
 def test_config_models_accessors():
     from app import config
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     assert config.auto_enabled() is True
     assert config.default_model() == "0gm"
     assert config.router_model() == "0gm"
@@ -163,7 +163,7 @@ def test_config_models_does_not_leak_to_browser():
     """The routing block stays backend-only — /config must not grow a 'models' key."""
     from app import config
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     assert "models" not in config.public()
 
 
@@ -182,7 +182,7 @@ def test_router_heuristic_tags():
 def test_router_by_strength_maps_tags_to_roster():
     from app import config, router
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     roster = config.roster()
     assert router._by_strength("code", roster, "0gm") == "deepseek-v4-pro"
     assert router._by_strength("multilingual", roster, "0gm") == "qwen3.7-max"
@@ -208,7 +208,7 @@ def test_router_choose_heuristic_no_network():
 
     from app import config, router
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     out = asyncio.run(router.choose("def add(a, b): return a + b", has_context=False, top_score=0.1))
     assert out["chosen"] == "deepseek-v4-pro"
     assert out["via"] == "heuristic"
@@ -219,7 +219,7 @@ def test_router_choose_classifier_unverified(monkeypatch):
 
     from app import config, router
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     calls = {}
 
     async def fake_chat(messages, model=None, *, verify=True, max_tokens=None):
@@ -240,7 +240,7 @@ def test_router_choose_falls_back_on_bad_classifier(monkeypatch):
 
     from app import config, router
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
 
     async def boom(messages, model=None, *, verify=True, max_tokens=None):
         raise RuntimeError("router model unavailable")
@@ -259,7 +259,7 @@ def test_rag_cascades_to_default_on_provider_failure(monkeypatch):
 
     from app import config, rag
 
-    config.load.cache_clear()
+    config._registry.cache_clear()
     seen = []
 
     async def fake_chat(messages, model=None, *, verify=True, max_tokens=None):
@@ -270,12 +270,12 @@ def test_rag_cascades_to_default_on_provider_failure(monkeypatch):
             raise httpx.ConnectError("provider unavailable")
         return {"answer": "ok", "verification": {"verified": True, "model": model}}
 
-    async def fake_choose(query, *, has_context, top_score):
+    async def fake_choose(query, *, has_context, top_score, instance=None):
         return {"chosen": "deepseek-v4-pro", "reason": "code query", "via": "heuristic"}
 
     monkeypatch.setattr(rag.zerog, "chat", fake_chat)
     monkeypatch.setattr(rag.router, "choose", fake_choose)
-    monkeypatch.setattr(rag.retrieve, "search_scored", lambda q, k=8: ([], 0.0))
+    monkeypatch.setattr(rag.retrieve, "search_scored", lambda q, k=8, collection=None: ([], 0.0))
 
     out = asyncio.run(rag.answer("def f(): pass", model="auto"))
     assert seen == ["deepseek-v4-pro", "0gm"]          # tried specialist, then cascaded
@@ -289,7 +289,7 @@ def test_config_malformed_value_keeps_structured_default(tmp_path):
 
     bad = tmp_path / "bad.json"
     bad.write_text('{"hero": "oops", "name": "Custom"}')
-    config.load.cache_clear()
+    config._registry.cache_clear()
     os.environ["OGORA_CONFIG"] = str(bad)
     try:
         c = config.load()
@@ -297,7 +297,7 @@ def test_config_malformed_value_keeps_structured_default(tmp_path):
         assert c["name"] == "Custom"  # well-typed scalar override still applied
     finally:
         os.environ.pop("OGORA_CONFIG", None)
-        config.load.cache_clear()
+        config._registry.cache_clear()
 
 
 def test_embed_model_load_is_thread_safe():

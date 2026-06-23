@@ -18,6 +18,7 @@ type InstanceConfig = {
   hero: { title: string; lead: string; sub: string };
   examples: string[];
   placeholder: string;
+  voice?: { enabled?: boolean };
 };
 
 const DEFAULT_CONFIG: InstanceConfig = {
@@ -31,11 +32,12 @@ const DEFAULT_CONFIG: InstanceConfig = {
   },
   examples: [
     "What is 0G?",
+    "What is Auto model?",
     "What is 0G Storage?",
     "How does TEE verification work?",
-    "Which models can I use?",
   ],
   placeholder: "Ask 0Gora…",
+  voice: { enabled: false },
 };
 
 type Citation = { n: number; url?: string; bin?: string };
@@ -49,6 +51,18 @@ type Msg = {
   verification?: Verification | null;
   routing?: Routing | null;
 };
+
+// Turn inline [n] citation markers into clickable links to their source — the
+// ChatGPT/Perplexity pattern. The [n] keeps its text; the <a> component below
+// renders bracketed-number links as a small superscript pill (.cite-ref).
+function linkifyCitations(content: string, citations?: Citation[]): string {
+  if (!citations?.length) return content;
+  const urlByN = new Map(citations.filter((c) => c.url).map((c) => [c.n, c.url as string]));
+  return content.replace(/\[(\d+)\]/g, (full, n) => {
+    const url = urlByN.get(Number(n));
+    return url ? `[\\[${n}\\]](${url})` : full;
+  });
+}
 
 export default function Home() {
   const [cfg, setCfg] = useState<InstanceConfig>(DEFAULT_CONFIG);
@@ -67,7 +81,12 @@ export default function Home() {
   const [showContribute, setShowContribute] = useState(false);
   const [contributeUrl, setContributeUrl] = useState("");
   const [contributeMsg, setContributeMsg] = useState("");
+  const [listening, setListening] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [voiceErr, setVoiceErr] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   // Fetched once: the model allowlist (shared across agoras — one funded 0G wallet
   // serves them all) and the list of agoras this deployment hosts (for the switcher).
@@ -106,6 +125,60 @@ export default function Home() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
+
+  // Voice input via MediaRecorder → the self-hosted STT service (/transcribe). Works in
+  // every browser (Chrome/Brave/Firefox/Safari) and the audio stays on-box — unlike the
+  // browser Web Speech API, which is Chrome-only and ships audio to Google. The mic shows
+  // only when this instance opted into voice (cfg.voice.enabled + the `voice` profile).
+  async function toggleVoice() {
+    if (transcribing) return;
+    if (listening) {
+      try {
+        recorderRef.current?.stop(); // fires onstop → transcribe
+      } catch {
+        /* noop */
+      }
+      return;
+    }
+    setVoiceErr("");
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setVoiceErr("This browser can't record audio. Try a recent Chrome/Firefox/Safari.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size) chunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setListening(false);
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+        if (!blob.size) return;
+        setTranscribing(true);
+        try {
+          const fd = new FormData();
+          fd.append("audio", blob, "clip.webm");
+          const r = await fetch("/transcribe", { method: "POST", body: fd });
+          if (!r.ok) throw new Error(String(r.status));
+          const d = await r.json();
+          if (d.text) setInput((prev) => (prev ? `${prev} ${d.text}` : d.text));
+          else setVoiceErr("Didn't catch that — tap the mic and try again.");
+        } catch {
+          setVoiceErr("Couldn't transcribe — try again, or type your question.");
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      recorderRef.current = mr;
+      mr.start();
+      setListening(true);
+    } catch {
+      setVoiceErr("Microphone blocked — allow mic access for this site (check the address-bar icon), then tap the mic again.");
+    }
+  }
 
   async function send(question?: string) {
     const q = (question ?? input).trim();
@@ -172,26 +245,28 @@ export default function Home() {
         <span className="tag">{cfg.instanceLabel}</span>
         <span className="spacer" />
         {instances.length > 1 && (
-          <select
-            value={instance}
-            onChange={(e) => setInstance(e.target.value)}
-            title="Knowledge base — which 0Gora to ask"
-          >
-            {instances.map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.label}
+          <label className="model-pick" title="Knowledge base — which 0Gora to ask">
+            <span className="model-label">Agora</span>
+            <select value={instance} onChange={(e) => setInstance(e.target.value)}>
+              {instances.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <label className="model-pick" title="0G model — Auto picks the best one per query">
+          <span className="model-label">Model</span>
+          <select value={model} onChange={(e) => setModel(e.target.value)}>
+            <option value="auto">Auto</option>
+            {models.map((m) => (
+              <option key={m} value={m}>
+                {m}
               </option>
             ))}
           </select>
-        )}
-        <select value={model} onChange={(e) => setModel(e.target.value)} title="0G model — Auto picks the best per query">
-          <option value="auto">Auto</option>
-          {models.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+        </label>
         {CONTRIBUTE_ENABLED && (
           <button className="ghost" onClick={() => setShowContribute(true)}>
             + Contribute
@@ -224,7 +299,22 @@ export default function Home() {
               {m.role === "assistant" ? (
                 <>
                   <div className="answer">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a({ node, children, ...props }) {
+                          const txt = Array.isArray(children) ? children.join("") : String(children ?? "");
+                          const isRef = /^\[\d+\]$/.test(txt);
+                          return (
+                            <a {...props} target="_blank" rel="noreferrer" className={isRef ? "cite-ref" : undefined}>
+                              {children}
+                            </a>
+                          );
+                        },
+                      }}
+                    >
+                      {linkifyCitations(m.content, m.citations)}
+                    </ReactMarkdown>
                   </div>
                   {m.verification && (
                     <div className={`seal ${m.verification.mock ? "mock" : ""}`}>
@@ -282,10 +372,18 @@ export default function Home() {
         </div>
       )}
 
+      {voiceErr && <div className="voice-note">{voiceErr}</div>}
+
       <div className="composer">
         <textarea
           value={input}
-          placeholder={cfg.placeholder}
+          placeholder={
+            listening
+              ? "Listening… speak now (tap the mic to stop)"
+              : transcribing
+                ? "Transcribing…"
+                : cfg.placeholder
+          }
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -294,6 +392,17 @@ export default function Home() {
             }
           }}
         />
+        {cfg.voice?.enabled && (
+          <button
+            className={`mic${listening ? " rec" : ""}`}
+            onClick={toggleVoice}
+            disabled={busy || transcribing}
+            title={listening ? "Stop & transcribe" : transcribing ? "Transcribing…" : "Voice input"}
+            aria-label="Voice input"
+          >
+            {transcribing ? "…" : "🎤"}
+          </button>
+        )}
         <button className="primary" onClick={() => send()} disabled={busy}>
           Send
         </button>

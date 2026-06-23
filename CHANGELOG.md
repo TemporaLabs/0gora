@@ -10,7 +10,7 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
-## [0.2.2] — in progress — Multi-agora hosting + the ERC-8226 agora
+## [0.2.3] — in progress — Multi-agora hosting + the ERC-8226 agora
 ### Added
 - **Co-hosted agoras + in-app switcher.** One deployment can now serve **several agoras side by side** on a
   **single 0G wallet**. The chat (moved from `/0g` to **`/app`**) gains a **knowledge-base switcher** to the
@@ -26,7 +26,25 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
   New [`examples/erc-8226/`](examples/erc-8226/) (standalone) and [`examples/multi/`](examples/multi/) (the
   production layout co-hosting it with the 0G agora). Answers still **generate + TEE-verify on 0G**.
 
-## [0.2.1] — in progress — Auto model routing
+## [0.2.2] — 2026-06-23 — Voice, citations & a sharper KB
+### Added
+- **Clickable inline citations** — the `[n]` markers in answers link to their source
+  (rendered as small superscript pills), ChatGPT/Perplexity-style. The source cards remain.
+- **Self-hosted voice input (opt-in).** A `faster-whisper` STT service (`src/stt`, `POST
+  /transcribe`); the web mic records via `MediaRecorder` and transcribes **on-box** — works
+  in every browser (Brave/Firefox/Chrome/Safari) and the audio never leaves the stack
+  (unlike the browser Web Speech API, which is Chrome-only and ships audio to Google). It is
+  **OFF by default and profile-gated** (`profiles: ["voice"]`), so a default deploy builds
+  and runs nothing voice-related — zero footprint. An instance opts in via `voice.enabled`
+  in its config + the `voice` compose profile.
+- **`Model` label** on the picker and a **"What is Auto model?"** example chip.
+### Changed
+- **Knowledge base.** Ingested 0Gora's own `/docs` (so the agora answers questions about
+  itself, e.g. Auto routing) and declared `pc.0g.ai/models` as a corpus seed; **purged the
+  stale, deleted `docs/MODELS.md` chunks** that were 404-citing and outranking the live
+  per-model pages — model questions now cite `pc.0g.ai/models/<model>`.
+
+## [0.2.1] — 2026-06-23 — Auto model routing
 ### Added
 - **Auto model routing.** The model picker now defaults to **Auto**: the backend chooses the best 0G model
   per query (cheap/fast model for simple turns, a stronger or specialist model when the query needs it),

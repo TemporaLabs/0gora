@@ -33,6 +33,8 @@ select, button, input, textarea {
   border-radius: 8px; padding: 8px 10px; font-size: 14px; }
 select { border-radius: 999px; padding: 7px 14px; cursor: pointer; }
 button { cursor: pointer; }
+.model-pick { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.model-label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.2px; }
 button.primary { background: var(--purple-deep); border: none; color: #fff; font-weight: 600;
   background-image: var(--grad); }
 button.primary:disabled { opacity: 0.55; cursor: default; }
@@ -63,6 +65,13 @@ button.ghost { background: transparent; }
 .answer table { border-collapse: collapse; margin: 0 0 10px; font-size: 14px; }
 .answer th, .answer td { border: 1px solid var(--border); padding: 6px 10px; }
 .answer img { max-width: 100%; height: auto; display: block; margin: 14px 0; border-radius: 12px; border: 1px solid var(--border); }
+.answer a { color: var(--purple); text-decoration: none; }
+.answer a:hover { text-decoration: underline; }
+/* inline citation marker [n] → small superscript pill (ChatGPT/Perplexity style) */
+.answer a.cite-ref { display: inline-block; vertical-align: super; font-size: 0.68em; font-weight: 700;
+  line-height: 1; padding: 1px 5px; margin: 0 1px; border-radius: 6px; text-decoration: none;
+  color: var(--purple); background: rgba(183,95,255,0.12); border: 1px solid var(--border); }
+.answer a.cite-ref:hover { border-color: var(--purple); background: rgba(183,95,255,0.22); text-decoration: none; }
 
 /* ---------- verification seal ---------- */
 /* gradient BORDER over an opaque dark fill, so the seal text stays legible */
@@ -96,6 +105,15 @@ button.ghost { background: transparent; }
 .composer textarea { flex: 1; resize: none; height: 46px; max-height: 160px; line-height: 1.4; }
 .composer textarea:focus, input:focus, select:focus { outline: none; border-color: var(--purple); }
 .composer button { padding: 8px 20px; }
+/* voice input mic — sits between the textarea and Send */
+.composer .mic { padding: 0; width: 46px; height: 46px; border-radius: 999px; font-size: 18px;
+  display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--border);
+  flex: 0 0 auto; line-height: 1; }
+.composer .mic:hover { border-color: var(--purple); }
+.composer .mic.rec { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,63,164,0.25); animation: micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse { 0%,100% { box-shadow: 0 0 0 3px rgba(255,63,164,0.22); } 50% { box-shadow: 0 0 0 6px rgba(255,63,164,0.10); } }
+@media (prefers-reduced-motion: reduce) { .composer .mic.rec { animation: none; } }
+.voice-note { padding: 8px 20px 0; font-size: 12.5px; color: var(--pink); text-align: center; }
 
 /* ---------- thinking shimmer ---------- */
 .thinking { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 14px; }

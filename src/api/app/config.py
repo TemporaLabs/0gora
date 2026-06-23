@@ -44,13 +44,17 @@ _DEFAULTS: dict = {
     },
     "examples": [
         "What is 0G?",
+        "What is Auto model?",
         "What is 0G Storage?",
         "How does TEE verification work?",
-        "Which models can I use?",
     ],
     "placeholder": "Ask 0Gora…",
     "corpus": {"seeds": []},
     "prompts": {"grounded": None, "chat": None},
+    # Voice input. OFF by default — the framework ships voice-free. An instance opts
+    # in (and deploys the `voice` compose profile to run the STT service) by setting
+    # voice.enabled = true; the web UI then shows the mic and posts audio to /transcribe.
+    "voice": {"enabled": False},
     # Auto model routing (v0.2.1). `auto` enables the "Auto" picker default; `default`
     # is the safe model used for the classifier fallback + cascade-on-failure; `router`
     # is the model that does the (unverified) classification. `roster` declares the
@@ -185,6 +189,7 @@ def public(instance: str | None = None) -> dict:
         "hero": c["hero"],
         "examples": c["examples"],
         "placeholder": c["placeholder"],
+        "voice": c.get("voice", {"enabled": False}),
     }
 
 
