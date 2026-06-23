@@ -58,7 +58,12 @@ export default function Docs() {
               </div>
             </section>
           ))}
-          <p className="docs-end muted">Built originally for the 0G Zero Cup · <Link href="/">← back to 0Gora</Link></p>
+          <p className="docs-end muted">
+            Kept short on purpose — writing style inspired by the{" "}
+            <a href="https://github.com/juliusbrussee/caveman" target="_blank" rel="noreferrer">caveman</a>{" "}
+            principle (less is more), not fully emulated. · Built originally for the 0G Zero Cup ·{" "}
+            <Link href="/">← back to 0Gora</Link>
+          </p>
         </main>
       </div>
     </div>
