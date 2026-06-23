@@ -30,19 +30,15 @@ export default function Landing() {
             <span className="lp-accent">Human or agent.</span>
           </p>
           <p className="lp-def">
-            <b>0Gora</b> — 0G + <a href="https://www.britannica.com/topic/agora" target="_blank" rel="noreferrer">agora</a>,
-            the public square where knowledge was exchanged. A community-crowdsourced commons of
-            <b> verifiable knowledge</b>, built on 0G — every answer generated <em>and</em> cryptographically
-            sealed in a 0G TEE.
+            <b>0G + <a href="https://www.britannica.com/topic/agora" target="_blank" rel="noreferrer">agora</a></b> —
+            a public square of knowledge. Built by the community. <b>Answers you can trust.</b>
           </p>
           <div className="lp-cta">
             <a className="btn btn-primary" href={GITHUB_URL} target="_blank" rel="noreferrer">
-              Build your 0Gora today <span className="arr">→</span>
-              <span className="btn-sub">on GitHub</span>
+              Build your 0Gora <span className="arr">→</span>
             </a>
             <Link className="btn btn-ghost" href={DOCS_URL}>
-              Read the Docs <span className="arr">→</span>
-              <span className="btn-sub">guides &amp; architecture</span>
+              Read the docs
             </Link>
           </div>
         </div>
@@ -52,25 +48,24 @@ export default function Landing() {
       <section className="lp-section">
         <h2 className="lp-h2">What is 0Gora?</h2>
         <p className="lp-lead">
-          A townhall of exchange. Spin up a living, crowdsourced knowledge base for any community or
-          domain — then let people <em>and</em> AI agents ask it, and trust the answers, because every
-          response is verified on 0G's decentralized compute.
+          A shared knowledge base for any community — that <em>people</em> and <em>AI</em> can ask,
+          with answers you can trust.
         </p>
         <div className="lp-cards">
           <div className="lp-card">
             <div className="lp-card-ic">⌘</div>
-            <h3>Crowdsourced knowledge</h3>
-            <p>A shared commons anyone can contribute to — a marketplace of knowledge, not a walled garden.</p>
+            <h3>Crowdsourced</h3>
+            <p>Anyone can add to it — open, not locked away.</p>
           </div>
           <div className="lp-card">
             <div className="lp-card-ic">◇</div>
-            <h3>Verifiable on 0G</h3>
-            <p>Answers are generated and TEE-attested on 0G compute, so you can trust where each one came from.</p>
+            <h3>Verified on 0G</h3>
+            <p>Every answer is checked on 0G — no black box.</p>
           </div>
           <div className="lp-card">
             <div className="lp-card-ic">⚇</div>
-            <h3>Humans <span className="lp-accent">and</span> agents</h3>
-            <p>A clean web square for people, and an MCP surface so AI agents can read and reason over it too.</p>
+            <h3>People <span className="lp-accent">and</span> AI</h3>
+            <p>Ask it yourself, or let your AI agent ask.</p>
           </div>
         </div>
       </section>
@@ -81,11 +76,10 @@ export default function Landing() {
           <span className="lp-eyebrow">Live example</span>
           <h2 className="lp-h2">Try the 0G 0Gora</h2>
           <p className="lp-lead">
-            One agora we built: a living knowledge base about <b>0G itself</b> — its docs, blog, and
-            models. Ask it anything; every answer is sealed in a 0G TEE.
+            See one in action — a knowledge base about <b>0G itself</b>. Ask it anything.
           </p>
           <Link className="btn btn-primary btn-lg" href={APP_URL}>
-            Open the 0G 0Gora app <span className="arr">→</span>
+            Open the app <span className="arr">→</span>
           </Link>
         </div>
       </section>
