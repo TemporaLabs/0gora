@@ -1,33 +1,46 @@
 # What is 0Gora?
 
-**0Gora** — *0G + [agora](https://www.britannica.com/topic/agora), the public square where knowledge
-was exchanged.* It's a community-crowdsourced commons of **verifiable knowledge**, built on 0G:
-create any town square — for anything, for anyone, **human or agent** — and trust the answers, because
-every response is generated *and* cryptographically sealed in a 0G Trusted Execution Environment (TEE).
+**0Gora** — 0G + [agora](https://www.britannica.com/topic/agora), the public square where knowledge was
+exchanged. A community-crowdsourced knowledge base, built on 0G. Ask it anything; every answer is grounded,
+cited, and **verified on 0G**.
 
-## The idea
+**For people and AI agents alike** — humans use the web, agents connect over MCP. Same verified brain.
 
-Most knowledge assistants are walled gardens you have to take on faith. 0Gora flips both: a **shared
-commons** anyone can contribute to, where each answer carries a **0G TEE attestation** proving which
-verified model produced it. A marketplace of knowledge, not a black box.
+## What it's for
+- A shared, open knowledge base for any community or domain — not a walled garden.
+- Answers you can trust: each is generated and TEE-verified on 0G, with citations. No black box.
+- One source of truth your team **and** your agents can query.
 
-## Two surfaces, one verified brain
+## Where it fits
+- Project/protocol docs that answer questions (our live demo: a 0Gora about 0G itself).
+- A community or DAO knowledge commons.
+- An internal knowledge base with verifiable answers.
+- A knowledge tool your AI agents can call — and trust.
 
-- **For humans** — a clean web square at [0gora.temporalabs.com](https://0gora.temporalabs.com). Ask a
-  question, get a grounded answer with citations and a "Verified on 0G" seal.
-- **For agents** — an **MCP** server so AI agents (Claude Code and others) can read and reason over the
-  same knowledge base over a standard protocol. See [Using 0Gora](GUIDE.md).
+## Using 0Gora
 
-## The live example
+Two front doors, one verified brain.
 
-The reference deployment is **the 0G 0Gora** at [0gora.temporalabs.com/0g](https://0gora.temporalabs.com/0g) —
-a living knowledge base about **0G itself** (its docs, blog, and models). It's one agora built on 0Gora;
-you can build your own from the [open-source repo](https://github.com/TemporaLabs/0gora).
+### Humans — the web
+Open **[0gora.temporalabs.com/0g](https://0gora.temporalabs.com/0g)**. Ask. Optionally pick a model (0GM is
+default). Each answer shows inline citations `[n]` and a **Verified on 0G** seal. If a question isn't in the
+corpus, 0Gora answers from general knowledge instead of guessing.
 
-## Where to go next
+### Agents — MCP
+Connect over MCP (hosted, Streamable HTTP): `https://0gora.temporalabs.com/mcp`
 
-- **[Using 0Gora](GUIDE.md)** — the two paths: humans via the web, agents via MCP.
-- **[Architecture](ARCHITECTURE.md)** — how retrieval, generation, and 0G verification fit together.
-- **[Model catalog](MODELS.md)** — the verifiable 0G models and why each was selected.
+```bash
+claude mcp add --transport http 0gora https://0gora.temporalabs.com/mcp
+```
 
-Created originally for the 0G Zero Cup.
+| Tool | Args | Returns |
+|------|------|---------|
+| `ask_0gora` | `question`, `model?` | answer + citations + verification (`verified`, `model`, `chatID`) |
+| `search_0g_knowledge` | `query`, `k?` | raw passages + source URLs (no LLM) |
+| `list_models` | — | the verified 0G models |
+
+An agent gets knowledge it can **verify came from a TEE-attested model on 0G** — not just text. See
+[`../mcp/README.md`](../mcp/README.md).
+
+---
+Next: [Why 0G?](WHY-0G.md) · [Inside 0Gora](INSIDE.md)

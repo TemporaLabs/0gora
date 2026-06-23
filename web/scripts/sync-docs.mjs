@@ -7,7 +7,7 @@ import path from "node:path";
 
 const SRC = path.resolve(process.cwd(), "../docs");
 const DEST = path.resolve(process.cwd(), "app/docs/_content");
-const FILES = ["README.md", "GUIDE.md", "ARCHITECTURE.md", "MODELS.md"];
+const FILES = ["README.md", "WHY-0G.md", "INSIDE.md"];
 
 if (!fs.existsSync(SRC)) {
   // In the Docker build context ../docs doesn't exist — keep the committed copy.

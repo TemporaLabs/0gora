@@ -13,9 +13,8 @@ const GITHUB_URL = "https://github.com/TemporaLabs/0gora";
 
 const DOCS = [
   { slug: "overview", file: "README.md", title: "What is 0Gora?" },
-  { slug: "guide", file: "GUIDE.md", title: "Using 0Gora" },
-  { slug: "architecture", file: "ARCHITECTURE.md", title: "Architecture" },
-  { slug: "models", file: "MODELS.md", title: "Model catalog" },
+  { slug: "why-0g", file: "WHY-0G.md", title: "Why 0G?" },
+  { slug: "inside", file: "INSIDE.md", title: "Inside 0Gora" },
 ];
 
 function load(file: string): string {

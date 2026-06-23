@@ -97,11 +97,12 @@ Built from **open-source libraries**, with **0G doing the verifiable inference**
 originally for the 0G Zero Cup.**
 
 ## Docs
-- [`docs/GUIDE.md`](docs/GUIDE.md) — **how to use 0Gora** — two paths: humans (web app) and AI agents (MCP).
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — components, the answer flow, what "Verified on 0G" means,
-  and the dual human/agent surface.
-- [`docs/MODELS.md`](docs/MODELS.md) — the four models and why each was selected.
+- [`docs/README.md`](docs/README.md) — **What is 0Gora?** — overview + using it as a human or agent.
+- [`docs/WHY-0G.md`](docs/WHY-0G.md) — **Why 0G?** — the 0G stack, what 0Gora uses, architecture, model catalog.
+- [`docs/INSIDE.md`](docs/INSIDE.md) — **Inside 0Gora** — RAG/retrieval, storage, and deploying your own with Docker.
 - [`mcp/README.md`](mcp/README.md) — the MCP server + example client for AI agents.
+
+Rendered docs: <https://0gora.temporalabs.com/docs>.
 - [`CHANGELOG.md`](CHANGELOG.md) — version history.
 
 ## License
