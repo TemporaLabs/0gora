@@ -52,6 +52,12 @@ app.post("/v1/chat/completions", async (req, res) => {
   }
 });
 
-app.listen(PORT, () =>
-  console.log(`[0gora-zerog] listening on :${PORT} (configured=${client.isConfigured()})`)
-);
+app.listen(PORT, () => {
+  console.log(`[0gora-zerog] listening on :${PORT} (configured=${client.isConfigured()})`);
+  if (process.env.ZEROG_MOCK === "true") {
+    console.warn(
+      "\n  ⚠️  ZEROG_MOCK=true — answers are CANNED and NOT verified on 0G.\n" +
+        "      This is local-dev mode only. Never run production with mock enabled.\n"
+    );
+  }
+});

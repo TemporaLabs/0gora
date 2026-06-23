@@ -3,6 +3,12 @@
 name: 0gora
 
 services:
+  # Hard guarantee: production never serves mock answers, even if a stray .env
+  # with ZEROG_MOCK=true lands on the box. This overlay pins it to false.
+  zerog:
+    environment:
+      - ZEROG_MOCK=false
+
   nginx:
     image: nginx:1.27-alpine
     depends_on:
