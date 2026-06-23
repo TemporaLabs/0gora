@@ -45,9 +45,14 @@ branding, example questions, and seed corpus come from `examples/0g/0gora.config
 runtime. Seed the corpus with `examples/0g/seed.sh`. Add `-f src/deploy/docker-compose.prod.yml` for TLS in
 production.
 
-**Found your own:** copy `examples/0g` to `examples/<your-topic>`, edit `0gora.config.json` (name, questions,
-seed URLs) and `.env` (your funded 0G wallet + models), and bring it up with your folder's overlay. Same
+**Found your own:** the fastest path is the scaffolder — `npm create 0gora@latest my-agora` clones the
+framework and generates a configured `examples/<slug>/` for you. (By hand: copy `examples/0g` to
+`examples/<your-topic>`, edit `0gora.config.json` and `.env`, bring it up with your folder's overlay.) Same
 framework, a brand-new verifiable agora.
+
+**Use one (agents):** `npx 0gora-mcp` connects any MCP agent to a running 0Gora, or drop in the
+[`src/skill/`](https://github.com/TemporaLabs/0gora/tree/main/src/skill) skill to teach an agent to join one
+and found its own.
 
 ---
 Next: [What is 0Gora?](README.md) · [Why 0G?](WHY-0G.md)
