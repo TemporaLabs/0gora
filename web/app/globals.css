@@ -237,3 +237,30 @@ button.ghost { background: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .lp-word, .lp-headline, .lp-def, .lp-cta { animation: none; }
 }
+
+/* ============================ DOCS PAGE ============================ */
+.docs-wrap { display: grid; grid-template-columns: 230px 1fr; gap: 44px; max-width: 1040px;
+  width: 100%; margin: 0 auto; padding: 40px 24px 80px; }
+.docs-side { position: sticky; top: 80px; align-self: start; height: fit-content; }
+.docs-side-title { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; }
+.docs-side nav { display: flex; flex-direction: column; gap: 4px; }
+.docs-side nav a { color: var(--text); text-decoration: none; font-size: 14px; padding: 7px 10px;
+  border-radius: 8px; border-left: 2px solid transparent; }
+.docs-side nav a:hover { background: var(--panel); border-left-color: var(--purple); }
+.docs-side-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 13px; }
+.docs-side-foot a { color: var(--muted); text-decoration: none; }
+.docs-side-foot a:hover { color: var(--purple); }
+.docs-main { min-width: 0; }
+.docs-section { scroll-margin-top: 80px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--border); }
+.docs-section:last-of-type { border-bottom: none; }
+.docs-section .answer { line-height: 1.7; }
+.docs-section .answer h1 { font-size: 28px; margin-top: 0; }
+.docs-section .answer h2 { font-size: 21px; }
+.docs-end { padding-top: 8px; }
+.docs-end a { color: var(--purple); text-decoration: none; }
+@media (max-width: 760px) {
+  .docs-wrap { grid-template-columns: 1fr; gap: 16px; padding: 24px 18px 60px; }
+  .docs-side { position: static; }
+  .docs-side nav { flex-direction: row; flex-wrap: wrap; }
+}

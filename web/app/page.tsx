@@ -3,7 +3,7 @@ import Link from "next/link";
 // External links. DOCS_URL points to the repo docs today; swap to the GitBook
 // URL (GitHub-synced from the same docs/) once the space exists — one line.
 const GITHUB_URL = "https://github.com/TemporaLabs/0gora";
-const DOCS_URL = "https://github.com/TemporaLabs/0gora/tree/main/docs";
+const DOCS_URL = "/docs";
 const APP_URL = "/0g";
 
 export default function Landing() {
@@ -13,7 +13,7 @@ export default function Landing() {
         <span className="logo">ØGora</span>
         <nav className="lp-nav">
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
-          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+          <Link href={DOCS_URL}>Docs</Link>
         </nav>
       </header>
 
@@ -40,10 +40,10 @@ export default function Landing() {
               Build your 0Gora today <span className="arr">→</span>
               <span className="btn-sub">on GitHub</span>
             </a>
-            <a className="btn btn-ghost" href={DOCS_URL} target="_blank" rel="noreferrer">
+            <Link className="btn btn-ghost" href={DOCS_URL}>
               Read the Docs <span className="arr">→</span>
               <span className="btn-sub">guides &amp; architecture</span>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -94,7 +94,7 @@ export default function Landing() {
         <span className="logo logo-sm">ØGora</span>
         <nav>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
-          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+          <Link href={DOCS_URL}>Docs</Link>
           <a href={`${GITHUB_URL}/tree/main/mcp`} target="_blank" rel="noreferrer">MCP (for agents)</a>
           <Link href={APP_URL}>The 0G app</Link>
         </nav>
