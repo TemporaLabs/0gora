@@ -8,12 +8,33 @@ import remarkGfm from "remark-gfm";
 // NEXT_PUBLIC_CONTRIBUTE=on to expose the Contribute UI again.
 const CONTRIBUTE_ENABLED = process.env.NEXT_PUBLIC_CONTRIBUTE === "on";
 
-const EXAMPLES = [
-  "What is 0G?",
-  "What is 0G Storage?",
-  "How does TEE verification work?",
-  "Which models can I use?",
-];
+// Instance branding is config-driven: the backend serves it at /api/config from the
+// deployment's 0gora.config.json. These defaults mirror the 0G example, so the first
+// paint (and any fetch failure) renders exactly as before — no flash, no regression.
+type InstanceConfig = {
+  logo: string;
+  instanceLabel: string;
+  hero: { title: string; lead: string; sub: string };
+  examples: string[];
+  placeholder: string;
+};
+
+const DEFAULT_CONFIG: InstanceConfig = {
+  logo: "ØGora",
+  instanceLabel: "the 0G agora · an example built on 0Gora",
+  hero: {
+    title: "ØGora",
+    lead: "Ask. Verify. Trust.",
+    sub: "A marketplace of knowledge on 0G. Every answer is generated and cryptographically verified inside a 0G TEE — so you can trust where it came from.",
+  },
+  examples: [
+    "What is 0G?",
+    "What is 0G Storage?",
+    "How does TEE verification work?",
+    "Which models can I use?",
+  ],
+  placeholder: "Ask 0Gora…",
+};
 
 type Citation = { n: number; url?: string; bin?: string };
 type Verification = { verified?: boolean; mock?: boolean; model?: string; chatID?: string };
@@ -25,6 +46,7 @@ type Msg = {
 };
 
 export default function Home() {
+  const [cfg, setCfg] = useState<InstanceConfig>(DEFAULT_CONFIG);
   const [models, setModels] = useState<string[]>([]);
   const [model, setModel] = useState<string>("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -43,6 +65,11 @@ export default function Home() {
         setModels(ms);
         if (ms.length) setModel(ms[0]);
       })
+      .catch(() => {});
+    // Pull this instance's branding/examples from the backend (config-driven).
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => setCfg((c) => ({ ...c, ...d, hero: { ...c.hero, ...(d.hero || {}) } })))
       .catch(() => {});
   }, []);
 
@@ -110,8 +137,8 @@ export default function Home() {
   return (
     <div className="wrap">
       <div className="header">
-        <a className="logo" href="/" title="Back to 0Gora">ØGora</a>
-        <span className="tag">the 0G agora · an example built on 0Gora</span>
+        <a className="logo" href="/" title="Back to 0Gora">{cfg.logo}</a>
+        <span className="tag">{cfg.instanceLabel}</span>
         <span className="spacer" />
         {models.length > 0 && (
           <select value={model} onChange={(e) => setModel(e.target.value)} title="0G model">
@@ -135,14 +162,11 @@ export default function Home() {
           <div className="hero-wash" />
           <div className="hero-scrim" />
           <div className="hero-inner">
-            <h1>ØGora</h1>
-            <p className="lead">Ask. Verify. Trust.</p>
-            <p className="sub">
-              A marketplace of knowledge on 0G. Every answer is generated <em>and</em> cryptographically
-              verified inside a 0G TEE — so you can trust where it came from.
-            </p>
+            <h1>{cfg.hero.title}</h1>
+            <p className="lead">{cfg.hero.lead}</p>
+            <p className="sub">{cfg.hero.sub}</p>
             <div className="chips">
-              {EXAMPLES.map((ex) => (
+              {cfg.examples.map((ex) => (
                 <button key={ex} className="chip" onClick={() => send(ex)}>
                   {ex}
                 </button>
@@ -212,7 +236,7 @@ export default function Home() {
       <div className="composer">
         <textarea
           value={input}
-          placeholder="Ask 0Gora…"
+          placeholder={cfg.placeholder}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {

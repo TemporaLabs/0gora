@@ -1,0 +1,37 @@
+{
+  "$comment": "The 0G 0Gora — the example instance that ships with the framework. This file is the SINGLE declarative source of truth for everything that makes this instance about 0G: its branding, its example questions, its seed corpus, and its system prompts. It contains NO secrets — the wallet key and runtime toggles live in .env (gitignored). To found your own 0Gora: copy this folder, edit this file, point .env at your funded 0G wallet, and deploy. The framework in ../../src reads this at runtime (mounted at /example/0gora.config.json); none of it is baked into the code.",
+
+  "name": "0Gora",
+  "logo": "ØGora",
+  "instanceLabel": "the 0G agora · an example built on 0Gora",
+  "ecosystem": "the 0G ecosystem",
+
+  "hero": {
+    "title": "ØGora",
+    "lead": "Ask. Verify. Trust.",
+    "sub": "A marketplace of knowledge on 0G. Every answer is generated and cryptographically verified inside a 0G TEE — so you can trust where it came from."
+  },
+
+  "examples": [
+    "What is 0G?",
+    "What is 0G Storage?",
+    "How does TEE verification work?",
+    "Which models can I use?"
+  ],
+
+  "placeholder": "Ask 0Gora…",
+
+  "corpus": {
+    "$comment": "Seed sources for this instance's knowledge base, ingested via POST /contribute (see seed.sh). The live corpus is 0G's docs + blog.",
+    "seeds": [
+      { "url": "https://0g.ai/blog", "mode": "site", "max_pages": 30 },
+      { "url": "https://docs.0g.ai", "mode": "site", "max_pages": 60 }
+    ]
+  },
+
+  "prompts": {
+    "$comment": "Optional system-prompt overrides. null = use the framework default, which is templated from `name` + `ecosystem` above.",
+    "grounded": null,
+    "chat": null
+  }
+}

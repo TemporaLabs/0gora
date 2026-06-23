@@ -13,37 +13,27 @@ from __future__ import annotations
 import os
 import re
 
-from . import retrieve, zerog
+from . import config, retrieve, zerog
 
 # Top bge cosine below this → treat the corpus as having nothing relevant.
 # bge cosines run compressed-high: ~0.47 unrelated, ~0.73+ on-topic, so ~0.70 separates.
 RELEVANCE_THRESHOLD = float(os.environ.get("RELEVANCE_THRESHOLD", "0.70"))
 
-GROUNDED_SYSTEM = (
-    "You are 0Gora, a knowledge assistant for the 0G ecosystem. Use the numbered context passages to "
-    "answer, citing facts inline as [n] to match the numbered context. If the context does not fully "
-    "answer the question, supplement with your own general knowledge — but never attach a [n] citation "
-    "to anything that is not in the context. Be helpful and concise; do not refuse outright."
-)
-
-CHAT_SYSTEM = (
-    "You are 0Gora, a helpful assistant for the 0G ecosystem and general questions. The knowledge "
-    "base has no relevant sources for this message, so answer naturally and concisely from your own "
-    "general knowledge. Do not invent citations, sources, or [n] markers."
-)
+# System prompts are templated from the instance config (name + ecosystem) so the
+# same framework serves any agora; the 0G defaults live in config._DEFAULTS.
 
 
 def build_prompt(query: str, chunks: list[dict]) -> list[dict]:
     ctx = "\n\n".join(f"[{i + 1}] {c.get('text', '')}" for i, c in enumerate(chunks))
     return [
-        {"role": "system", "content": GROUNDED_SYSTEM},
+        {"role": "system", "content": config.grounded_system()},
         {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {query}"},
     ]
 
 
 def build_chat_prompt(query: str) -> list[dict]:
     return [
-        {"role": "system", "content": CHAT_SYSTEM},
+        {"role": "system", "content": config.chat_system()},
         {"role": "user", "content": query},
     ]
 

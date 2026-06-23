@@ -7,9 +7,9 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
-from . import ingest, rag, retrieve, zerog
+from . import config, ingest, rag, retrieve, zerog
 
-app = FastAPI(title="0Gora", version="0.1.3")
+app = FastAPI(title="0Gora", version="0.2.0")
 
 
 @app.on_event("startup")
@@ -34,6 +34,14 @@ def _guard_contribute(key: str | None) -> None:
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "0gora-backend"}
+
+
+@app.get("/config")
+async def instance_config():
+    """Public (secret-free) instance config — branding, examples, placeholder — so the
+    web UI renders whatever agora this deployment is configured for. Driven by the
+    mounted 0gora.config.json; falls back to the built-in 0G defaults."""
+    return config.public()
 
 
 @app.get("/models")
