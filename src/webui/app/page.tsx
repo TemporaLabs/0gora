@@ -1,7 +1,6 @@
 import Link from "next/link";
 
-// External links. DOCS_URL points to the repo docs today; swap to the GitBook
-// URL (GitHub-synced from the same docs/) once the space exists — one line.
+// External link + internal routes: /docs is the in-site documentation, /0g the example chat.
 const GITHUB_URL = "https://github.com/TemporaLabs/0gora";
 const DOCS_URL = "/docs";
 const APP_URL = "/0g";
