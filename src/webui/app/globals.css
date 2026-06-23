@@ -198,6 +198,11 @@ button.ghost { background: transparent; }
   font-size: 22px; color: #fff; background-image: var(--grad); margin-bottom: 14px; box-shadow: 0 0 18px rgba(183, 95, 255, 0.3); }
 .lp-card h3 { font-size: 17px; margin: 0 0 8px; font-weight: 700; }
 .lp-card p { font-size: 14px; line-height: 1.6; color: var(--muted); margin: 0; }
+.lp-cmd { display: inline-block; margin-top: 12px; padding: 6px 10px; border-radius: 8px;
+  background: rgba(183,95,255,0.10); border: 1px solid var(--border); color: var(--purple);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+  text-decoration: none; word-break: break-word; }
+a.lp-cmd:hover { border-color: var(--purple); }
 
 /* try section */
 .lp-try { position: relative; padding: 84px 24px; text-align: center;
@@ -230,12 +235,13 @@ button.ghost { background: transparent; }
   from { opacity: 0; transform: translateY(22px) scale(0.97); filter: blur(6px); }
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
+.lp-hero-eyebrow { animation: lpPop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
 .lp-word     { animation: lpPop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.20s both; }
 .lp-headline { animation: lpPop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both; }
 .lp-def      { animation: lpPop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.90s both; }
 .lp-cta      { animation: lpPop 0.75s cubic-bezier(0.22, 1, 0.36, 1) 1.25s both; }
 @media (prefers-reduced-motion: reduce) {
-  .lp-word, .lp-headline, .lp-def, .lp-cta { animation: none; }
+  .lp-hero-eyebrow, .lp-word, .lp-headline, .lp-def, .lp-cta { animation: none; }
 }
 
 /* ============================ DOCS PAGE ============================ */
