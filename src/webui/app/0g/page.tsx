@@ -75,6 +75,7 @@ export default function Home() {
   const [contributeMsg, setContributeMsg] = useState("");
   const [listening, setListening] = useState(false);
   const [voiceOK, setVoiceOK] = useState(false);
+  const [voiceErr, setVoiceErr] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const recogRef = useRef<any>(null);
 
@@ -107,13 +108,22 @@ export default function Home() {
     r.interimResults = true;
     r.continuous = false;
     r.onresult = (e: any) => {
+      setVoiceErr("");
       const t = Array.from(e.results)
         .map((res: any) => res[0]?.transcript || "")
         .join("");
       setInput(t);
     };
     r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
+    r.onerror = (e: any) => {
+      setListening(false);
+      const err = e?.error;
+      if (err === "not-allowed" || err === "service-not-allowed")
+        setVoiceErr("Microphone blocked — allow mic access for this site (check the address-bar icon), then tap the mic again.");
+      else if (err === "no-speech") setVoiceErr("Didn't catch that — tap the mic and speak.");
+      else if (err === "audio-capture") setVoiceErr("No microphone found.");
+      else if (err && err !== "aborted") setVoiceErr("Voice input error — try again.");
+    };
     recogRef.current = r;
     setVoiceOK(true);
     return () => {
@@ -136,11 +146,18 @@ export default function Home() {
       }
       setListening(false);
     } else {
+      setVoiceErr("");
       setInput("");
       try {
         r.start();
         setListening(true);
       } catch {
+        // start() throws if a prior session is still winding down — reset and let the user retry.
+        try {
+          r.abort();
+        } catch {
+          /* noop */
+        }
         setListening(false);
       }
     }
@@ -326,10 +343,12 @@ export default function Home() {
         </div>
       )}
 
+      {voiceErr && <div className="voice-note">{voiceErr}</div>}
+
       <div className="composer">
         <textarea
           value={input}
-          placeholder={cfg.placeholder}
+          placeholder={listening ? "Listening… speak now (tap the mic to stop)" : cfg.placeholder}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
