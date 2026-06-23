@@ -138,12 +138,12 @@ export class ZerogClient {
     };
   }
 
-  async chatCompletion(req) {
+  async chatCompletion(req, opts = {}) {
     if (this.mock) return this._mockCompletion(req);
-    return this._real(req);
+    return this._real(req, opts);
   }
 
-  async _real(req) {
+  async _real(req, opts = {}) {
     const broker = await this._broker();
     const svc = await this._resolve(req.model || this.defaultModel);
     if (!svc) throw new Error("no 0G chatbot service available");
@@ -190,14 +190,18 @@ export class ZerogClient {
     }
     const chatID = resp.headers.get("ZG-Res-Key") || data?.id;
     let verified = false;
-    try {
-      // Each verify attempt is serialized (nonce-safe); the backoff between
-      // attempts is outside the lock so a slow signature doesn't block others.
-      verified = await withRetry(() =>
-        this._serialize(() => broker.inference.processResponse(provider, chatID))
-      );
-    } catch (e) {
-      console.warn("[sidecar] processResponse failed:", e?.message);
+    // opts.verify === false → skip the (slow) TEE attestation. Used for internal,
+    // non-user-facing calls like the routing classifier; the answer is discarded.
+    if (opts.verify !== false) {
+      try {
+        // Each verify attempt is serialized (nonce-safe); the backoff between
+        // attempts is outside the lock so a slow signature doesn't block others.
+        verified = await withRetry(() =>
+          this._serialize(() => broker.inference.processResponse(provider, chatID))
+        );
+      } catch (e) {
+        console.warn("[sidecar] processResponse failed:", e?.message);
+      }
     }
     return {
       openai: data,

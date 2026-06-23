@@ -126,6 +126,163 @@ def test_config_defaults_match_shipped_example():
         assert config._DEFAULTS[k] == ex[k], f"_DEFAULTS[{k}] drifted from the shipped example"
 
 
+# ---- auto model routing (v0.2.1) ------------------------------------------
+def _strip_comments(o):
+    """Drop JSON-doc '$...' keys so a config block can be compared to _DEFAULTS."""
+    if isinstance(o, dict):
+        return {k: _strip_comments(v) for k, v in o.items() if not k.startswith("$")}
+    if isinstance(o, list):
+        return [_strip_comments(v) for v in o]
+    return o
+
+
+def test_models_block_matches_example():
+    """The routing roster in _DEFAULTS must match the shipped example (minus $comments)."""
+    path = os.path.join(os.path.dirname(__file__), "../../../examples/0g/0gora.config.json")
+    if not os.path.exists(path):
+        pytest.skip("example config not in build context")
+    from app import config
+
+    with open(path, encoding="utf-8") as f:
+        ex = json.load(f)
+    assert config._DEFAULTS["models"] == _strip_comments(ex["models"])
+
+
+def test_config_models_accessors():
+    from app import config
+
+    config.load.cache_clear()
+    assert config.auto_enabled() is True
+    assert config.default_model() == "0gm"
+    assert config.router_model() == "0gm"
+    roster = config.roster()
+    assert [m["id"] for m in roster] == ["0gm", "zai-org/GLM-5.1-FP8", "deepseek-v4-pro", "qwen3.7-max"]
+
+
+def test_config_models_does_not_leak_to_browser():
+    """The routing block stays backend-only — /config must not grow a 'models' key."""
+    from app import config
+
+    config.load.cache_clear()
+    assert "models" not in config.public()
+
+
+def test_router_heuristic_tags():
+    from app import router
+
+    assert router.heuristic_tag("hi there") == "general"
+    assert router.heuristic_tag("```python\nprint(1)\n```") == "code"
+    assert router.heuristic_tag("def foo(x): return x") == "code"
+    assert router.heuristic_tag("What is the integral of x^2?") == "math"
+    assert router.heuristic_tag("これは何ですか") == "multilingual"
+    # An ordinary general question is ambiguous → defer to the classifier.
+    assert router.heuristic_tag("Tell me about the history of trade routes") is None
+
+
+def test_router_by_strength_maps_tags_to_roster():
+    from app import config, router
+
+    config.load.cache_clear()
+    roster = config.roster()
+    assert router._by_strength("code", roster, "0gm") == "deepseek-v4-pro"
+    assert router._by_strength("multilingual", roster, "0gm") == "qwen3.7-max"
+    assert router._by_strength("general", roster, "fallback-id") == "0gm"
+    # Unknown tag → the default.
+    assert router._by_strength("nonsense", roster, "fallback-id") == "fallback-id"
+
+
+def test_router_parse_choice():
+    from app import router
+
+    ids = ["0gm", "deepseek-v4-pro"]
+    assert router.parse_choice('{"model": "deepseek-v4-pro", "reason": "code"}', ids) == ("deepseek-v4-pro", "code")
+    # Surrounding prose is tolerated.
+    assert router.parse_choice('ok {"model":"0gm","reason":"simple"} done', ids)[0] == "0gm"
+    # A model not in the roster is rejected (would 404 on the broker).
+    assert router.parse_choice('{"model": "gpt-4"}', ids) == (None, "")
+    assert router.parse_choice("not json at all", ids) == (None, "")
+
+
+def test_router_choose_heuristic_no_network():
+    import asyncio
+
+    from app import config, router
+
+    config.load.cache_clear()
+    out = asyncio.run(router.choose("def add(a, b): return a + b", has_context=False, top_score=0.1))
+    assert out["chosen"] == "deepseek-v4-pro"
+    assert out["via"] == "heuristic"
+
+
+def test_router_choose_classifier_unverified(monkeypatch):
+    import asyncio
+
+    from app import config, router
+
+    config.load.cache_clear()
+    calls = {}
+
+    async def fake_chat(messages, model=None, *, verify=True, max_tokens=None):
+        calls["verify"] = verify
+        calls["model"] = model
+        return {"answer": '{"model": "deepseek-v4-pro", "reason": "needs reasoning"}', "verification": None}
+
+    monkeypatch.setattr(router.zerog, "chat", fake_chat)
+    out = asyncio.run(router.choose("Compare two consensus designs", has_context=False, top_score=0.1))
+    assert out["chosen"] == "deepseek-v4-pro"
+    assert out["via"] == "classifier"
+    assert calls["verify"] is False  # routing call must skip TEE attestation
+    assert calls["model"] == "0gm"   # ...and run on the cheap router model
+
+
+def test_router_choose_falls_back_on_bad_classifier(monkeypatch):
+    import asyncio
+
+    from app import config, router
+
+    config.load.cache_clear()
+
+    async def boom(messages, model=None, *, verify=True, max_tokens=None):
+        raise RuntimeError("router model unavailable")
+
+    monkeypatch.setattr(router.zerog, "chat", boom)
+    out = asyncio.run(router.choose("Compare two consensus designs", has_context=False, top_score=0.1))
+    assert out["chosen"] == "0gm"  # default
+    assert out["via"] == "fallback"
+
+
+def test_rag_cascades_to_default_on_provider_failure(monkeypatch):
+    """In auto mode, a provider failure on the chosen model retries the default."""
+    import asyncio
+
+    import httpx
+
+    from app import config, rag
+
+    config.load.cache_clear()
+    seen = []
+
+    async def fake_chat(messages, model=None, *, verify=True, max_tokens=None):
+        seen.append(model)
+        if model == "deepseek-v4-pro":
+            # Real provider/availability failures surface as httpx errors (sidecar 5xx;
+            # zerog.chat raise_for_status). Only these trigger the cascade now.
+            raise httpx.ConnectError("provider unavailable")
+        return {"answer": "ok", "verification": {"verified": True, "model": model}}
+
+    async def fake_choose(query, *, has_context, top_score):
+        return {"chosen": "deepseek-v4-pro", "reason": "code query", "via": "heuristic"}
+
+    monkeypatch.setattr(rag.zerog, "chat", fake_chat)
+    monkeypatch.setattr(rag.router, "choose", fake_choose)
+    monkeypatch.setattr(rag.retrieve, "search_scored", lambda q, k=8: ([], 0.0))
+
+    out = asyncio.run(rag.answer("def f(): pass", model="auto"))
+    assert seen == ["deepseek-v4-pro", "0gm"]          # tried specialist, then cascaded
+    assert out["routing"]["chosen"] == "0gm"
+    assert "cascaded" in out["routing"]["reason"]
+
+
 def test_config_malformed_value_keeps_structured_default(tmp_path):
     """A non-dict 'hero' in a user config must not blank the structured default (page would render an empty <h1>)."""
     from app import config

@@ -31,26 +31,30 @@ const DEFAULT_CONFIG: InstanceConfig = {
   },
   examples: [
     "What is 0G?",
+    "What is Auto model?",
     "What is 0G Storage?",
     "How does TEE verification work?",
-    "Which models can I use?",
   ],
   placeholder: "Ask 0Gora…",
 };
 
 type Citation = { n: number; url?: string; bin?: string };
 type Verification = { verified?: boolean; mock?: boolean; model?: string; chatID?: string };
+// Set when the picker is on "Auto": which model the backend routed to, and why.
+type Routing = { chosen?: string; reason?: string; via?: string };
 type Msg = {
   role: "user" | "assistant";
   content: string;
   citations?: Citation[];
   verification?: Verification | null;
+  routing?: Routing | null;
 };
 
 export default function Home() {
   const [cfg, setCfg] = useState<InstanceConfig>(DEFAULT_CONFIG);
   const [models, setModels] = useState<string[]>([]);
-  const [model, setModel] = useState<string>("");
+  // Default to Auto: the backend picks the best model per query (manual pin still available).
+  const [model, setModel] = useState<string>("auto");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -65,7 +69,7 @@ export default function Home() {
       .then((d) => {
         const ms: string[] = d.models || [];
         setModels(ms);
-        if (ms.length) setModel(ms[0]);
+        // Keep the default on "Auto"; the live list just populates the manual-pin options.
       })
       .catch(() => {});
     // Pull this instance's branding/examples from the backend (config-driven).
@@ -89,7 +93,7 @@ export default function Home() {
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: q, model: model || undefined }),
+        body: JSON.stringify({ message: q, model: model || "auto" }),
       });
       // Parse defensively: an error response may be plain text, not JSON.
       const raw = await r.text();
@@ -106,6 +110,7 @@ export default function Home() {
           content: d.answer || d.detail || "⚠️ No answer returned. Please try again.",
           citations: d.citations,
           verification: d.x_0g_verification,
+          routing: d.routing,
         },
       ]);
     } catch {
@@ -142,15 +147,17 @@ export default function Home() {
         <a className="logo" href="/" title="Back to 0Gora">{cfg.logo}</a>
         <span className="tag">{cfg.instanceLabel}</span>
         <span className="spacer" />
-        {models.length > 0 && (
-          <select value={model} onChange={(e) => setModel(e.target.value)} title="0G model">
+        <label className="model-pick" title="0G model — Auto picks the best one per query">
+          <span className="model-label">Model</span>
+          <select value={model} onChange={(e) => setModel(e.target.value)}>
+            <option value="auto">Auto</option>
             {models.map((m) => (
               <option key={m} value={m}>
                 {m}
               </option>
             ))}
           </select>
-        )}
+        </label>
         {CONTRIBUTE_ENABLED && (
           <button className="ghost" onClick={() => setShowContribute(true)}>
             + Contribute
@@ -199,6 +206,12 @@ export default function Home() {
                           {m.verification.chatID ? ` · ${m.verification.chatID.slice(0, 10)}…` : ""}
                         </span>
                       </span>
+                    </div>
+                  )}
+                  {m.routing?.chosen && (
+                    <div className="route" title="Auto routing chose this model for your query">
+                      ⤷ Auto routed to <b>{m.routing.chosen}</b>
+                      {m.routing.reason ? ` · ${m.routing.reason}` : ""}
                     </div>
                   )}
                   {(() => {

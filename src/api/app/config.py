@@ -38,13 +38,30 @@ _DEFAULTS: dict = {
     },
     "examples": [
         "What is 0G?",
+        "What is Auto model?",
         "What is 0G Storage?",
         "How does TEE verification work?",
-        "Which models can I use?",
     ],
     "placeholder": "Ask 0Gora…",
     "corpus": {"seeds": []},
     "prompts": {"grounded": None, "chat": None},
+    # Auto model routing (v0.2.1). `auto` enables the "Auto" picker default; `default`
+    # is the safe model used for the classifier fallback + cascade-on-failure; `router`
+    # is the model that does the (unverified) classification. `roster` declares the
+    # selectable models with their lanes — the router resolves strength tags against it.
+    # This is POLICY; the routing engine is framework code (app/router.py). Model ids
+    # must match the funded ZEROG_MODELS allowlist in .env.
+    "models": {
+        "auto": True,
+        "default": "0gm",
+        "router": "0gm",
+        "roster": [
+            {"id": "0gm", "tier": "fast", "strengths": ["general", "short", "greetings"]},
+            {"id": "zai-org/GLM-5.1-FP8", "tier": "strong", "strengths": ["reasoning", "analysis"]},
+            {"id": "deepseek-v4-pro", "tier": "strong", "strengths": ["code", "math", "logic"]},
+            {"id": "qwen3.7-max", "tier": "large", "strengths": ["multilingual", "long-context"]},
+        ],
+    },
 }
 
 
@@ -96,6 +113,34 @@ def public() -> dict:
         "examples": c["examples"],
         "placeholder": c["placeholder"],
     }
+
+
+def models_cfg() -> dict:
+    """The routing/model policy block (auto, default, router, roster). Never secret."""
+    m = load().get("models")
+    return m if isinstance(m, dict) else {}
+
+
+def auto_enabled() -> bool:
+    return bool(models_cfg().get("auto", False))
+
+
+def default_model() -> str:
+    """Safe fallback model (classifier fallback + cascade target). '' = sidecar default."""
+    return str(models_cfg().get("default") or "")
+
+
+def router_model() -> str:
+    """Model used for the (unverified) routing classification; defaults to default_model()."""
+    return str(models_cfg().get("router") or "") or default_model()
+
+
+def roster() -> list[dict]:
+    """Selectable models with their lanes; only well-formed entries with an id."""
+    r = models_cfg().get("roster")
+    if not isinstance(r, list):
+        return []
+    return [m for m in r if isinstance(m, dict) and m.get("id")]
 
 
 def grounded_system() -> str:

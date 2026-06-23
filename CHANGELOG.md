@@ -10,6 +10,19 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
+## [0.2.1] — 2026-06-23 — Auto model routing
+### Added
+- **Auto model routing.** The model picker now defaults to **Auto**: the backend chooses the best 0G model
+  per query (cheap/fast model for simple turns, a stronger or specialist model when the query needs it),
+  then generates **and TEE-verifies** the answer on that model. A short line under each answer shows which
+  model was routed to and why. Manual model pinning is still available.
+  - **How it routes:** a free heuristic short-circuit (greeting / code / math / non-Latin script / very long)
+    handles obvious queries; ambiguous ones get one short **unverified** classification call on the cheap
+    router model (`0gm`). Routing is **config-driven** via the new `models` block in `0gora.config.json`
+    (`auto` / `default` / `router` / `roster` with per-model lanes) — tune it without touching code.
+  - **Never strands a query:** the router only chooses from the funded roster, and if a chosen provider is
+    unavailable it cascades to the default model automatically.
+
 ## [0.2.0] — 2026-06-23 — Framework / example split
 ### Changed
 - **0Gora is now a reusable framework.** The services moved under a single `src/` umbrella —

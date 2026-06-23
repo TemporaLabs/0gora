@@ -43,7 +43,11 @@ app.post("/v1/chat/completions", async (req, res) => {
       .json({ error: { message: "0G compute not configured (set ZEROG_PRIVATE_KEY)" } });
   }
   try {
-    const { openai, verification } = await client.chatCompletion(req.body);
+    // `verify` is a 0Gora control flag, not an upstream param — strip it before the
+    // body reaches the 0G provider. verify=false skips the TEE attestation round-trip
+    // (used by the backend's routing classifier, which isn't a user-facing answer).
+    const { verify, ...body } = req.body || {};
+    const { openai, verification } = await client.chatCompletion(body, { verify: verify !== false });
     res.setHeader("x-0g-verified", String(verification?.verified ?? false));
     res.json({ ...openai, x_0g_verification: verification });
   } catch (err) {

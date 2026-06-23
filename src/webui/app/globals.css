@@ -33,6 +33,8 @@ select, button, input, textarea {
   border-radius: 8px; padding: 8px 10px; font-size: 14px; }
 select { border-radius: 999px; padding: 7px 14px; cursor: pointer; }
 button { cursor: pointer; }
+.model-pick { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.model-label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.2px; }
 button.primary { background: var(--purple-deep); border: none; color: #fff; font-weight: 600;
   background-image: var(--grad); }
 button.primary:disabled { opacity: 0.55; cursor: default; }
@@ -78,6 +80,8 @@ button.ghost { background: transparent; }
 .seal .seal-main { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .seal .seal-sub { font-size: 11px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
 .seal .seal-sub b { color: var(--purple); font-weight: 600; }
+.route { margin-top: 6px; font-size: 11px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+.route b { color: var(--purple); font-weight: 600; }
 
 /* ---------- citation cards ---------- */
 .cites { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
