@@ -30,7 +30,7 @@ export default function Landing() {
             <span className="lp-accent">Human or agent.</span>
           </p>
           <p className="lp-def">
-            <b>ØGora = <a href="https://www.britannica.com/topic/agora" target="_blank" rel="noreferrer">Agora</a> + 0G.</b>{" "}
+            <b>ØGora = <a href="https://www.britannica.com/topic/agora" target="_blank" rel="noreferrer">Agora</a> + <a href="https://0g.ai" target="_blank" rel="noreferrer">0G</a>.</b>{" "}
             In Greek, <i>agora</i> (ἀγορά) means a <b>gathering place</b> — an assembly, a marketplace. ØGora is
             a marketplace of <b>knowledge</b>, powered by the <b>0G</b> stack — with answers you can trust.
           </p>
