@@ -10,7 +10,7 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
-## [0.2.2] — in progress — Voice, citations & a sharper KB
+## [0.2.2] — 2026-06-23 — Voice, citations & a sharper KB
 ### Added
 - **Clickable inline citations** — the `[n]` markers in answers link to their source
   (rendered as small superscript pills), ChatGPT/Perplexity-style. The source cards remain.
