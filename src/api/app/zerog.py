@@ -8,11 +8,23 @@ import httpx
 ZEROG_BASE = os.environ.get("ZEROG_BASE_URL", "http://zerog:8090/v1")
 
 
-async def chat(messages: list[dict], model: str | None = None) -> dict:
-    """POST to the 0G compute service → {answer, verification}."""
-    payload: dict = {"messages": messages, "stream": False}
+async def chat(
+    messages: list[dict],
+    model: str | None = None,
+    *,
+    verify: bool = True,
+    max_tokens: int | None = None,
+) -> dict:
+    """POST to the 0G compute service → {answer, verification}.
+
+    `verify=False` tells the sidecar to skip the TEE attestation round-trip — used for
+    the routing classification call, which is not a user-facing answer and must be cheap.
+    """
+    payload: dict = {"messages": messages, "stream": False, "verify": verify}
     if model:
         payload["model"] = model
+    if max_tokens:
+        payload["max_tokens"] = max_tokens
     async with httpx.AsyncClient(timeout=180) as c:
         r = await c.post(f"{ZEROG_BASE}/chat/completions", json=payload)
         r.raise_for_status()
