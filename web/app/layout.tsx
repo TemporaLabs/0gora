@@ -1,9 +1,9 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
-const TITLE = "0Gora — the public square of verifiable knowledge on 0G";
+const TITLE = "0Gora — the public square of knowledge on 0G";
 const DESC =
-  "0G + agora: a community-crowdsourced commons of verifiable knowledge. Create any town square — for anything, for anyone, human or agent. Every answer sealed in a 0G TEE.";
+  "0G + agora — a public square of knowledge. Create any town square, for anything, for anyone, human or AI. Built by the community, with answers you can trust.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://0gora.temporalabs.com"),
