@@ -12,15 +12,17 @@ def _rrf(rankings: list[list[dict]], kconst: int = 60) -> dict:
     return scores
 
 
-def search_scored(query: str, k: int = 8) -> tuple[list[dict], float]:
+def search_scored(query: str, k: int = 8, collection: str | None = None) -> tuple[list[dict], float]:
     """Hybrid retrieval that also returns the best vector cosine score, used to
-    gauge whether the corpus actually has anything relevant to the query."""
+    gauge whether the corpus actually has anything relevant to the query.
+
+    `collection` selects which agora's corpus to search (None = process default)."""
     # Vector candidates (always carry a cosine `score`).
-    vec_hits = vectorstore.search(embed.embed_query(query), k=k * 2)
+    vec_hits = vectorstore.search(embed.embed_query(query), k=k * 2, collection=collection)
     top_vector_score = max((h.get("score") or 0.0) for h in vec_hits) if vec_hits else 0.0
 
     # BM25 over the stored corpus
-    corpus = vectorstore.scroll_all()
+    corpus = vectorstore.scroll_all(collection=collection)
     bm25_hits: list[dict] = []
     if corpus:
         from rank_bm25 import BM25Okapi
@@ -37,5 +39,5 @@ def search_scored(query: str, k: int = 8) -> tuple[list[dict], float]:
     return [by_id[did] for did, _ in top], top_vector_score
 
 
-def hybrid_search(query: str, k: int = 8) -> list[dict]:
-    return search_scored(query, k)[0]
+def hybrid_search(query: str, k: int = 8, collection: str | None = None) -> list[dict]:
+    return search_scored(query, k, collection)[0]

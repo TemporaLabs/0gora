@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-// External link + internal routes: /docs is the in-site documentation, /0g the example chat.
+// External link + internal routes: /docs is the in-site documentation, /app the chat
+// (which now hosts every agora this deployment serves, behind an in-app instance switcher).
 const GITHUB_URL = "https://github.com/TemporaLabs/0gora";
 const DOCS_URL = "/docs";
-const APP_URL = "/0g";
+const APP_URL = "/app";
 
 export default function Landing() {
   return (

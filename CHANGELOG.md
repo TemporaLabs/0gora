@@ -10,6 +10,22 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
+## [0.2.3] — in progress — Multi-agora hosting + the ERC-8226 agora
+### Added
+- **Co-hosted agoras + in-app switcher.** One deployment can now serve **several agoras side by side** on a
+  **single 0G wallet**. The chat (moved from `/0g` to **`/app`**) gains a **knowledge-base switcher** to the
+  left of the model picker; flipping it swaps branding + example questions and routes retrieval to that
+  agora's corpus, clearing the conversation (a chat belongs to one corpus). The switcher hides itself when a
+  deployment hosts only one agora — single-instance behavior is unchanged.
+  - **Backend** resolves an `instance` per request to its **own Qdrant collection**, so co-hosted corpora
+    never mix. Config is now a **registry**: `OGORA_INSTANCES` lists several `0gora.config.json` files (first
+    = default); the prior single `OGORA_CONFIG` still works. New `id` / `collection` / `switcherLabel` config
+    fields. New **`GET /instances`**; `GET /config`, `POST /chat`, and `POST /contribute` accept `instance`.
+- **The ERC-8226 agora** — a verifiable public forum for [ERC-8226 (Regulated Agent Mandate)](https://github.com/ethereum/ERCs/blob/master/ERCS/erc-8226.md),
+  corpus seeded from the ERC text + the [Ethereum Magicians thread](https://ethereum-magicians.org/t/erc-8226-regulated-agent-mandate).
+  New [`examples/erc-8226/`](examples/erc-8226/) (standalone) and [`examples/multi/`](examples/multi/) (the
+  production layout co-hosting it with the 0G agora). Answers still **generate + TEE-verify on 0G**.
+
 ## [0.2.2] — 2026-06-23 — Voice, citations & a sharper KB
 ### Added
 - **Clickable inline citations** — the `[n]` markers in answers link to their source
