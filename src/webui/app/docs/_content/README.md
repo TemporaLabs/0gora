@@ -22,7 +22,8 @@ cited, and **verified on 0G**.
 Two front doors, one verified brain.
 
 ### Humans — the web
-Open **[0gora.temporalabs.com/0g](https://0gora.temporalabs.com/0g)**. Ask — by default 0Gora **auto-picks**
+Open **[0gora.temporalabs.com/app](https://0gora.temporalabs.com/app)**. Pick a knowledge base from the
+switcher (e.g. **0G** or **ERC-8226**) when more than one is hosted, then ask — by default 0Gora **auto-picks**
 the best 0G model for each query (a short *Auto routed to…* line shows which model answered and why); pin a
 specific model from the picker if you prefer. Each answer shows inline citations `[n]` and a **Verified on 0G**
 seal. If a question isn't in the corpus, 0Gora answers from general knowledge instead of guessing.

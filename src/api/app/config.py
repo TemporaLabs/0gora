@@ -5,10 +5,16 @@ What makes a given deployment about a specific topic — its name, branding, exa
 questions, seed corpus, and system prompts — is declared in an external JSON file
 (see examples/0g/0gora.config.json), NOT baked into the code.
 
-The path is taken from the OGORA_CONFIG env var (the example mounts the file at
-/example/0gora.config.json). If it is unset or unreadable, we fall back to the
-built-in defaults below — which mirror the shipped 0G example — so the framework
-always runs and a missing mount degrades gracefully instead of blanking the app.
+A deployment can serve ONE agora or SEVERAL side by side (e.g. the 0G agora and an
+ERC-8226 agora on the same host, behind one in-app switcher). Instances are declared
+via env:
+  • OGORA_INSTANCES — comma-separated config paths → a multi-instance deployment.
+  • OGORA_CONFIG — a single config path (back-compat single-instance).
+  • neither → the built-in 0G defaults as one instance.
+The FIRST instance is the default (served when no/unknown `instance` is requested).
+Each instance keeps its OWN Qdrant collection (its `collection` field, else
+QDRANT_COLLECTION, else "0gora") so their corpora never mix. A missing/unreadable
+mount degrades to the built-in defaults instead of blanking the app.
 
 Secrets never appear here: the wallet key and runtime toggles come from the
 environment (.env), never from this declarative config.
@@ -87,10 +93,8 @@ def _deep_merge(base: dict, over: dict) -> dict:
     return out
 
 
-@lru_cache(maxsize=1)
-def load() -> dict:
-    """Load the instance config (env path overlaid on defaults). Cached for the process."""
-    path = os.getenv("OGORA_CONFIG", "").strip()
+def _load_one(path: str) -> dict:
+    """Load + merge a single instance config file onto the defaults."""
     if not path or not os.path.exists(path):
         return dict(_DEFAULTS)
     try:
@@ -102,9 +106,78 @@ def load() -> dict:
         return dict(_DEFAULTS)
 
 
-def public() -> dict:
+def _slug_from_path(path: str) -> str:
+    """Fallback instance id from the config's parent dir (examples/<slug>/0gora.config.json)."""
+    return os.path.basename(os.path.dirname(path.rstrip("/"))) or ""
+
+
+@lru_cache(maxsize=1)
+def _registry() -> dict:
+    """Build the instance registry: {id -> merged config}, plus an ordered id list under
+    "__order__". The first id is the default. Cached for the process."""
+    paths = [p.strip() for p in os.getenv("OGORA_INSTANCES", "").split(",") if p.strip()]
+    if not paths:
+        single = os.getenv("OGORA_CONFIG", "").strip()
+        paths = [single] if single else []
+
+    default_collection = os.getenv("QDRANT_COLLECTION", "0gora")
+    reg: dict = {}
+    order: list[str] = []
+    for i, p in enumerate(paths):
+        cfg = _load_one(p)
+        iid = str(cfg.get("id") or "").strip() or _slug_from_path(p) or f"instance{i + 1}"
+        cfg["_collection"] = str(cfg.get("collection") or default_collection).strip() or "0gora"
+        if iid not in reg:
+            order.append(iid)
+        reg[iid] = cfg
+
+    if not reg:  # no config mounted at all → built-in defaults as a single instance.
+        cfg = dict(_DEFAULTS)
+        cfg["_collection"] = default_collection
+        reg["0g"] = cfg
+        order = ["0g"]
+
+    reg["__order__"] = order
+    return reg
+
+
+def _cfg(instance: str | None = None) -> dict:
+    """Resolve an instance id to its config; None/unknown → the default (first) instance."""
+    reg = _registry()
+    if instance and instance != "__order__" and instance in reg:
+        return reg[instance]
+    return reg[reg["__order__"][0]]
+
+
+def load(instance: str | None = None) -> dict:
+    """The merged config for an instance (the default instance when unspecified)."""
+    return _cfg(instance)
+
+
+def default_instance() -> str:
+    """Id of the default instance (the first declared)."""
+    return _registry()["__order__"][0]
+
+
+def instances() -> list[dict]:
+    """The list the UI switcher renders: [{id, label}], in declared order."""
+    reg = _registry()
+    out: list[dict] = []
+    for iid in reg["__order__"]:
+        c = reg[iid]
+        label = c.get("switcherLabel") or c.get("logo") or c.get("name") or iid
+        out.append({"id": iid, "label": label})
+    return out
+
+
+def collection_for(instance: str | None = None) -> str:
+    """The Qdrant collection that holds this instance's corpus."""
+    return _cfg(instance).get("_collection", "0gora")
+
+
+def public(instance: str | None = None) -> dict:
     """Non-secret instance config safe to expose to the browser (GET /config)."""
-    c = load()
+    c = _cfg(instance)
     return {
         "name": c["name"],
         "logo": c["logo"],
@@ -115,36 +188,36 @@ def public() -> dict:
     }
 
 
-def models_cfg() -> dict:
+def models_cfg(instance: str | None = None) -> dict:
     """The routing/model policy block (auto, default, router, roster). Never secret."""
-    m = load().get("models")
+    m = _cfg(instance).get("models")
     return m if isinstance(m, dict) else {}
 
 
-def auto_enabled() -> bool:
-    return bool(models_cfg().get("auto", False))
+def auto_enabled(instance: str | None = None) -> bool:
+    return bool(models_cfg(instance).get("auto", False))
 
 
-def default_model() -> str:
+def default_model(instance: str | None = None) -> str:
     """Safe fallback model (classifier fallback + cascade target). '' = sidecar default."""
-    return str(models_cfg().get("default") or "")
+    return str(models_cfg(instance).get("default") or "")
 
 
-def router_model() -> str:
+def router_model(instance: str | None = None) -> str:
     """Model used for the (unverified) routing classification; defaults to default_model()."""
-    return str(models_cfg().get("router") or "") or default_model()
+    return str(models_cfg(instance).get("router") or "") or default_model(instance)
 
 
-def roster() -> list[dict]:
+def roster(instance: str | None = None) -> list[dict]:
     """Selectable models with their lanes; only well-formed entries with an id."""
-    r = models_cfg().get("roster")
+    r = models_cfg(instance).get("roster")
     if not isinstance(r, list):
         return []
     return [m for m in r if isinstance(m, dict) and m.get("id")]
 
 
-def grounded_system() -> str:
-    c = load()
+def grounded_system(instance: str | None = None) -> str:
+    c = _cfg(instance)
     if c["prompts"].get("grounded"):
         return c["prompts"]["grounded"]
     return (
@@ -156,8 +229,8 @@ def grounded_system() -> str:
     )
 
 
-def chat_system() -> str:
-    c = load()
+def chat_system(instance: str | None = None) -> str:
+    c = _cfg(instance)
     if c["prompts"].get("chat"):
         return c["prompts"]["chat"]
     return (

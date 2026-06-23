@@ -32,7 +32,7 @@ export default function Docs() {
       <header className="lp-head">
         <Link className="logo" href="/">ØGora</Link>
         <nav className="lp-nav">
-          <Link href="/0g">Try the app</Link>
+          <Link href="/app">Try the app</Link>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
         </nav>
       </header>

@@ -25,17 +25,17 @@ RELEVANCE_THRESHOLD = float(os.environ.get("RELEVANCE_THRESHOLD", "0.70"))
 # same framework serves any agora; the 0G defaults live in config._DEFAULTS.
 
 
-def build_prompt(query: str, chunks: list[dict]) -> list[dict]:
+def build_prompt(query: str, chunks: list[dict], instance: str | None = None) -> list[dict]:
     ctx = "\n\n".join(f"[{i + 1}] {c.get('text', '')}" for i, c in enumerate(chunks))
     return [
-        {"role": "system", "content": config.grounded_system()},
+        {"role": "system", "content": config.grounded_system(instance)},
         {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {query}"},
     ]
 
 
-def build_chat_prompt(query: str) -> list[dict]:
+def build_chat_prompt(query: str, instance: str | None = None) -> list[dict]:
     return [
-        {"role": "system", "content": config.chat_system()},
+        {"role": "system", "content": config.chat_system(instance)},
         {"role": "user", "content": query},
     ]
 
@@ -50,7 +50,9 @@ def _cited(answer: str, chunks: list[dict]) -> list[dict]:
     ]
 
 
-async def _resolve_target(query: str, model: str | None, has_context: bool, top_score: float):
+async def _resolve_target(
+    query: str, model: str | None, has_context: bool, top_score: float, instance: str | None = None
+):
     """Decide which model answers. Returns (target_model_or_None, routing_or_None).
 
     - A concrete pin (user picked a specific model) is honored exactly, no routing.
@@ -60,13 +62,15 @@ async def _resolve_target(query: str, model: str | None, has_context: bool, top_
     """
     if model not in (None, "auto"):
         return model, None
-    if config.auto_enabled():
-        routing = await router.choose(query, has_context=has_context, top_score=top_score)
+    if config.auto_enabled(instance):
+        routing = await router.choose(query, has_context=has_context, top_score=top_score, instance=instance)
         return routing["chosen"], routing
     return None, None
 
 
-async def _generate(messages: list[dict], target: str | None, routing: dict | None) -> dict:
+async def _generate(
+    messages: list[dict], target: str | None, routing: dict | None, instance: str | None = None
+) -> dict:
     """Generate on `target`, cascading to the configured default if the provider fails
     (e.g. an unfunded specialist 502s) — but only in auto mode, so an explicit user pin
     is never silently overridden. Updates `routing` to reflect the model that answered."""
@@ -76,7 +80,7 @@ async def _generate(messages: list[dict], target: str | None, routing: dict | No
         # Provider/availability failure (5xx from the sidecar, timeout, connection) →
         # try the safe default. Scoped to httpx errors so a real bug (TypeError, etc.)
         # propagates instead of silently triggering a second billed inference.
-        default = config.default_model()
+        default = config.default_model(instance)
         if routing is not None and default and default != target:
             routing["chosen"] = default
             routing["reason"] = f"{routing.get('reason', '').strip()} · cascaded to default".strip(" ·")
@@ -85,15 +89,16 @@ async def _generate(messages: list[dict], target: str | None, routing: dict | No
         raise
 
 
-async def answer(query: str, model: str | None = None) -> dict:
-    chunks, top_score = retrieve.search_scored(query, k=8)
+async def answer(query: str, model: str | None = None, instance: str | None = None) -> dict:
+    collection = config.collection_for(instance)
+    chunks, top_score = retrieve.search_scored(query, k=8, collection=collection)
     has_context = bool(chunks) and top_score >= RELEVANCE_THRESHOLD
 
-    target, routing = await _resolve_target(query, model, has_context, top_score)
+    target, routing = await _resolve_target(query, model, has_context, top_score, instance)
 
     # Nothing relevant in the KB → plain LLM answer from general knowledge, no citations.
-    messages = build_prompt(query, chunks) if has_context else build_chat_prompt(query)
-    res = await _generate(messages, target, routing)
+    messages = build_prompt(query, chunks, instance) if has_context else build_chat_prompt(query, instance)
+    res = await _generate(messages, target, routing, instance)
 
     out = {
         "answer": res["answer"],

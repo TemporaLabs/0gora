@@ -105,14 +105,15 @@ def parse_choice(text: str, valid_ids: list[str]) -> tuple[str | None, str]:
     return None, ""
 
 
-async def choose(query: str, *, has_context: bool, top_score: float) -> dict:
+async def choose(query: str, *, has_context: bool, top_score: float, instance: str | None = None) -> dict:
     """Return {"chosen": id, "reason": str, "via": heuristic|classifier|fallback}.
 
     `has_context`/`top_score` are passed for future use (grounded RAG vs general chat
-    is a meaningful, free routing signal) and to keep the call site stable.
+    is a meaningful, free routing signal) and to keep the call site stable. `instance`
+    selects which agora's routing policy (roster/default/router) applies.
     """
-    roster = config.roster()
-    default = config.default_model()
+    roster = config.roster(instance)
+    default = config.default_model(instance)
     ids = [m["id"] for m in roster] or ([default] if default else [])
 
     if not ids:  # no roster configured → let the sidecar default decide
@@ -127,7 +128,7 @@ async def choose(query: str, *, has_context: bool, top_score: float) -> dict:
     try:
         res = await zerog.chat(
             _classify_messages(query, roster),
-            model=config.router_model() or default,
+            model=config.router_model(instance) or default,
             verify=False,
             max_tokens=80,
         )

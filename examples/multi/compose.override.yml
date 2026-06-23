@@ -1,0 +1,32 @@
+# Co-hosted 0Gora — the 0G agora AND the ERC-8226 agora on ONE deployment.
+#
+# This is the production layout for 0gora.temporalabs.com: a single stack (one web,
+# one backend, one Qdrant, one 0G inference sidecar = one funded wallet) serving BOTH
+# agoras. The in-app switcher at /app flips between them; the backend routes retrieval
+# to each instance's own Qdrant collection (`0gora` vs `erc8226`), so their corpora
+# never mix while the wallet, models, and UI are shared.
+#
+# It mounts BOTH sibling configs and lists them in OGORA_INSTANCES — the first
+# (0g) is the default instance.
+#
+# Run (from the repo root), with TLS:
+#   docker compose -f src/deploy/docker-compose.yml \
+#                  -f src/deploy/docker-compose.prod.yml \
+#                  -f examples/multi/compose.override.yml \
+#                  --env-file examples/multi/.env up -d --build
+#
+# Then seed BOTH corpora (each script sends its own instance id):
+#   CONTRIBUTE_KEY=... API=http://localhost:8000 ./examples/0g/seed.sh
+#   CONTRIBUTE_KEY=... API=http://localhost:8000 ./examples/erc-8226/seed.sh
+name: 0gora
+
+services:
+  backend:
+    # Mount each agora's config at a distinct path and declare both. Collections come
+    # from each config's `collection` field — do NOT set QDRANT_COLLECTION here (that
+    # would force a single shared collection and defeat the separation).
+    volumes:
+      - ../../examples/0g/0gora.config.json:/example/0g/0gora.config.json:ro
+      - ../../examples/erc-8226/0gora.config.json:/example/erc-8226/0gora.config.json:ro
+    environment:
+      - OGORA_INSTANCES=/example/0g/0gora.config.json,/example/erc-8226/0gora.config.json

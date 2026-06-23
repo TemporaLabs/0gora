@@ -36,22 +36,33 @@ async def health():
     return {"status": "ok", "service": "0gora-backend"}
 
 
+@app.get("/instances")
+async def instances():
+    """The agoras this deployment serves, in order — feeds the in-app instance switcher.
+    A single-instance deployment returns one entry; the UI then hides the switcher."""
+    return {"instances": config.instances(), "default": config.default_instance()}
+
+
 @app.get("/config")
-async def instance_config():
+async def instance_config(instance: str | None = None):
     """Public (secret-free) instance config — branding, examples, placeholder — so the
-    web UI renders whatever agora this deployment is configured for. Driven by the
-    mounted 0gora.config.json; falls back to the built-in 0G defaults."""
-    return config.public()
+    web UI renders whatever agora this deployment is configured for. `instance` selects
+    which agora (default when omitted/unknown). Driven by the mounted 0gora.config.json;
+    falls back to the built-in 0G defaults."""
+    return config.public(instance)
 
 
 @app.get("/models")
 async def models():
+    # The model allowlist is the shared 0G sidecar's (one funded wallet serves every
+    # agora), so it is instance-independent — the picker shows the same models throughout.
     return {"models": await zerog.models()}
 
 
 class ChatRequest(BaseModel):
     message: str
     model: str | None = None
+    instance: str | None = None
 
 
 def _friendly_error(exc: Exception) -> str:
@@ -73,7 +84,7 @@ async def chat(req: ChatRequest):
     if not req.message.strip():
         return {"answer": "Ask me a question about the knowledge base.", "citations": [], "x_0g_verification": None}
     try:
-        return await rag.answer(req.message, req.model)
+        return await rag.answer(req.message, req.model, req.instance)
     except Exception as exc:  # noqa: BLE001 — never surface a raw 500 to the UI
         return {"answer": _friendly_error(exc), "citations": [], "x_0g_verification": None, "error": str(exc)[:200]}
 
@@ -106,30 +117,36 @@ class ContributeRequest(BaseModel):
     bin: str = "0g"
     mode: str = "single"  # single | site | sitemap
     max_pages: int = 40
+    # Which agora's corpus to ingest into (selects the Qdrant collection). Omitted =
+    # the default instance — so a single-agora deployment needs no change.
+    instance: str | None = None
 
 
 @app.post("/contribute")
 async def contribute(req: ContributeRequest, x_contribute_key: str | None = Header(default=None)):
     """Community contribute: ingest a URL (single page), a site (recursive crawl), or a sitemap."""
     _guard_contribute(x_contribute_key)
+    collection = config.collection_for(req.instance)
     if req.mode == "site":
-        res = await run_in_threadpool(ingest.ingest_site, req.url, req.bin, req.max_pages)
+        res = await run_in_threadpool(ingest.ingest_site, req.url, req.bin, req.max_pages, collection)
     elif req.mode == "sitemap":
-        res = await run_in_threadpool(ingest.ingest_sitemap, req.url, req.bin, req.max_pages)
+        res = await run_in_threadpool(ingest.ingest_sitemap, req.url, req.bin, req.max_pages, collection)
     else:
-        res = {"chunks": await run_in_threadpool(ingest.ingest_url, req.url, req.bin)}
-    return {"url": req.url, "bin": req.bin, "mode": req.mode, **res}
+        res = {"chunks": await run_in_threadpool(ingest.ingest_url, req.url, req.bin, collection)}
+    return {"url": req.url, "bin": req.bin, "mode": req.mode, "instance": req.instance or config.default_instance(), **res}
 
 
 class TextRequest(BaseModel):
     text: str
     source: str = "paste"
     bin: str = "0g"
+    instance: str | None = None
 
 
 @app.post("/contribute/text")
 async def contribute_text(req: TextRequest, x_contribute_key: str | None = Header(default=None)):
     """Ingest pasted text (e.g. an X post the crawler can't reach)."""
     _guard_contribute(x_contribute_key)
-    n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin)
+    collection = config.collection_for(req.instance)
+    n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin, collection)
     return {"source": req.source, "chunks": n}

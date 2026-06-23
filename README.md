@@ -63,7 +63,9 @@ All open-source; the 0G integration is our own code on the public 0G SDK.
 
 ## Three ways to use it
 0Gora is a **framework**, not just this one site — the engine lives in [`src/`](src/) and a deployment is a small
-config folder under [`examples/`](examples/0g/README.md):
+config folder under [`examples/`](examples/0g/README.md). One deployment can host **several agoras side by side**
+on a single 0G wallet, behind an in-app switcher at `/app` — the live site co-hosts the **0G** agora and an
+**[ERC-8226](examples/erc-8226/README.md)** agora this way (see [`examples/multi/`](examples/multi/README.md)).
 
 1. **Fork the repo** — clone it, copy [`examples/0g/`](examples/0g/README.md), edit the config, `docker compose up`
    (see [Run it](#run-it)).
