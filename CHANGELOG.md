@@ -10,7 +10,7 @@ leading to a `1.0.0` final. Tags mark each release; the newest version is at the
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
 
-## [0.2.1] — in progress — Auto model routing
+## [0.2.1] — 2026-06-23 — Auto model routing
 ### Added
 - **Auto model routing.** The model picker now defaults to **Auto**: the backend chooses the best 0G model
   per query (cheap/fast model for simple turns, a stronger or specialist model when the query needs it),
