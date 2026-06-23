@@ -19,7 +19,15 @@ Tags mark each release; the newest version is at the top.
 - **Verification seal** — the small badge is now a prominent trust seal showing the TEE attestation,
   model, and chatID, so the thing that makes 0Gora different is celebrated, not hidden.
 - "Built for agents too — connect over MCP" footer linking the agent surface.
+- **General-knowledge fallback** — when the knowledge base has nothing relevant (top vector score below a
+  threshold), 0Gora answers naturally from the model instead of replying "I don't have that information",
+  so greetings and off-topic questions get a real reply. Grounded, cited answers still serve KB questions.
 ### Changed
+- **Model lineup** — DeepSeek slot moved from `deepseek-chat-v3-0324` (DeepSeek-V3, being deprecated) to
+  **`deepseek-v4-pro`**, DeepSeek's current TeeML-verified checkpoint on the broker. `docs/MODELS.md`
+  refreshed with the rationale and the broader list of verifiable broker models.
+- **Citations** — only sources the answer actually cites inline (`[n]`) are shown, so a refusal or a
+  general-knowledge reply no longer displays unrelated retrieved passages.
 - **Brand refresh** — gradient ØGora wordmark, 0G pink/purple palette, citation cards, sticky header,
   animated "Thinking on 0G…" state, and a mobile-responsive layout.
 - **Mock-mode hardening** — the prod overlay pins `ZEROG_MOCK=false`, and the 0G service logs a loud
