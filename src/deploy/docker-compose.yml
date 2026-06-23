@@ -2,7 +2,7 @@ name: 0gora
 
 services:
   zerog:
-    build: ../zerog
+    build: ../inference
     environment:
       - PORT=8090
       - ZEROG_RPC_URL=${ZEROG_RPC_URL:-https://evmrpc.0g.ai}
@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ../backend
+    build: ../api
     environment:
       - ZEROG_BASE_URL=http://zerog:8090/v1
       - QDRANT_URL=http://qdrant:6333
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
 
   web:
-    build: ../web
+    build: ../webui
     environment:
       - BACKEND_URL=http://backend:8000
       - HOSTNAME=0.0.0.0

@@ -32,7 +32,7 @@ That's something a centralized LLM API fundamentally cannot offer. Later phases 
   serving broker with TEE attestation are offered — which is why router-only models like GLM-5.2 aren't listed.)*
 - ➕ **Contribute pipeline** — a URL is crawled, embedded, and instantly retrievable (admin-curated today;
   open community contribution is on the roadmap).
-- 🤖 **For humans *and* agents** — humans use the web app; AI agents use the [`mcp/`](mcp/) MCP server
+- 🤖 **For humans *and* agents** — humans use the web app; AI agents use the [`src/mcp/`](src/mcp/) MCP server
   (`ask_0gora` / `search_0g_knowledge` / `list_models`) to consume the same TEE-verified knowledge.
 
 ## Architecture
@@ -51,11 +51,11 @@ Contributors ─► Ingest ─► Chunk + Embed (bge) ─► Qdrant (vector stor
 
 | Path | What |
 |------|------|
-| `zerog/` | 0G compute service — OpenAI-compatible; runs GLM on 0G via the direct broker + TEE verification |
-| `backend/` | FastAPI — ingestion (URL/site/sitemap/paste), bge embeddings, hybrid retrieval, RAG |
-| `web/` | Next.js chat UI — model picker, citations, "Verified on 0G" badge, Contribute |
-| `mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*). Hosted at `/mcp`; or run locally over stdio |
-| `deployment/` | docker-compose (+ prod overlay: nginx + Let's Encrypt) |
+| `src/inference/` | 0G compute service — OpenAI-compatible; runs GLM on 0G via the direct broker + TEE verification |
+| `src/api/` | FastAPI — ingestion (URL/site/sitemap/paste), bge embeddings, hybrid retrieval, RAG |
+| `src/webui/` | Next.js chat UI — model picker, citations, "Verified on 0G" badge, Contribute |
+| `src/mcp/` | **MCP server** — `ask_0gora` / `search_0g_knowledge` / `list_models` for AI agents (the agent-facing *agora*). Hosted at `/mcp`; or run locally over stdio |
+| `src/deploy/` | docker-compose (+ prod overlay: nginx + Let's Encrypt) |
 
 ## Stack
 Next.js · FastAPI · Qdrant · sentence-transformers (bge/e5) · rank-bm25 · `@0glabs/0g-serving-broker` + ethers · Docker.
@@ -65,7 +65,7 @@ All open-source; the 0G integration is our own code on the public 0G SDK.
 
 **Local (mock 0G — no funds):**
 ```bash
-cd deployment
+cd src/deploy
 echo "ZEROG_MOCK=true" > .env
 docker compose up -d --build          # web :3000 · backend :8000 · qdrant :6333
 # seed: curl -X POST localhost:8000/contribute -H 'content-type: application/json' \
@@ -73,7 +73,7 @@ docker compose up -d --build          # web :3000 · backend :8000 · qdrant :63
 ```
 
 **Real mode (0G mainnet):** set `ZEROG_MOCK=false` + `ZEROG_PRIVATE_KEY` (a funded 0G wallet) in
-`deployment/.env`, confirm the live model id with `cd zerog && npm i && npm run probe`, then bring up.
+`src/deploy/.env`, confirm the live model id with `cd src/inference && npm i && npm run probe`, then bring up.
 Prod (TLS): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`.
 
 ## Access, contribution & storage
@@ -100,7 +100,7 @@ originally for the 0G Zero Cup.**
 - [`docs/README.md`](docs/README.md) — **What is 0Gora?** — overview + using it as a human or agent.
 - [`docs/WHY-0G.md`](docs/WHY-0G.md) — **Why 0G?** — the 0G stack, what 0Gora uses, architecture, model catalog.
 - [`docs/INSIDE.md`](docs/INSIDE.md) — **Inside 0Gora** — RAG/retrieval, storage, and deploying your own with Docker.
-- [`mcp/README.md`](mcp/README.md) — the MCP server + example client for AI agents.
+- [`src/mcp/README.md`](src/mcp/README.md) — the MCP server + example client for AI agents.
 
 Rendered docs: <https://0gora.temporalabs.com/docs>.
 - [`CHANGELOG.md`](CHANGELOG.md) — version history.
