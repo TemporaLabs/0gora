@@ -50,6 +50,18 @@ type Msg = {
   routing?: Routing | null;
 };
 
+// Turn inline [n] citation markers into clickable links to their source — the
+// ChatGPT/Perplexity pattern. The [n] keeps its text; the <a> component below
+// renders bracketed-number links as a small superscript pill (.cite-ref).
+function linkifyCitations(content: string, citations?: Citation[]): string {
+  if (!citations?.length) return content;
+  const urlByN = new Map(citations.filter((c) => c.url).map((c) => [c.n, c.url as string]));
+  return content.replace(/\[(\d+)\]/g, (full, n) => {
+    const url = urlByN.get(Number(n));
+    return url ? `[\\[${n}\\]](${url})` : full;
+  });
+}
+
 export default function Home() {
   const [cfg, setCfg] = useState<InstanceConfig>(DEFAULT_CONFIG);
   const [models, setModels] = useState<string[]>([]);
@@ -61,7 +73,10 @@ export default function Home() {
   const [showContribute, setShowContribute] = useState(false);
   const [contributeUrl, setContributeUrl] = useState("");
   const [contributeMsg, setContributeMsg] = useState("");
+  const [listening, setListening] = useState(false);
+  const [voiceOK, setVoiceOK] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const recogRef = useRef<any>(null);
 
   useEffect(() => {
     fetch("/api/models")
@@ -82,6 +97,54 @@ export default function Home() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
+
+  // Voice input via the Web Speech API (Chrome/Edge). The mic only shows when supported.
+  useEffect(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    const r = new SR();
+    r.lang = "en-US";
+    r.interimResults = true;
+    r.continuous = false;
+    r.onresult = (e: any) => {
+      const t = Array.from(e.results)
+        .map((res: any) => res[0]?.transcript || "")
+        .join("");
+      setInput(t);
+    };
+    r.onend = () => setListening(false);
+    r.onerror = () => setListening(false);
+    recogRef.current = r;
+    setVoiceOK(true);
+    return () => {
+      try {
+        r.abort();
+      } catch {
+        /* noop */
+      }
+    };
+  }, []);
+
+  function toggleVoice() {
+    const r = recogRef.current;
+    if (!r) return;
+    if (listening) {
+      try {
+        r.stop();
+      } catch {
+        /* noop */
+      }
+      setListening(false);
+    } else {
+      setInput("");
+      try {
+        r.start();
+        setListening(true);
+      } catch {
+        setListening(false);
+      }
+    }
+  }
 
   async function send(question?: string) {
     const q = (question ?? input).trim();
@@ -190,7 +253,22 @@ export default function Home() {
               {m.role === "assistant" ? (
                 <>
                   <div className="answer">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a({ node, children, ...props }) {
+                          const txt = Array.isArray(children) ? children.join("") : String(children ?? "");
+                          const isRef = /^\[\d+\]$/.test(txt);
+                          return (
+                            <a {...props} target="_blank" rel="noreferrer" className={isRef ? "cite-ref" : undefined}>
+                              {children}
+                            </a>
+                          );
+                        },
+                      }}
+                    >
+                      {linkifyCitations(m.content, m.citations)}
+                    </ReactMarkdown>
                   </div>
                   {m.verification && (
                     <div className={`seal ${m.verification.mock ? "mock" : ""}`}>
@@ -260,6 +338,17 @@ export default function Home() {
             }
           }}
         />
+        {voiceOK && (
+          <button
+            className={`mic${listening ? " rec" : ""}`}
+            onClick={toggleVoice}
+            disabled={busy}
+            title={listening ? "Stop voice input" : "Voice input"}
+            aria-label="Voice input"
+          >
+            🎤
+          </button>
+        )}
         <button className="primary" onClick={() => send()} disabled={busy}>
           Send
         </button>
