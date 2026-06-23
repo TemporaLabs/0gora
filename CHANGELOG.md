@@ -3,12 +3,36 @@
 All notable changes to **0Gora** — the verifiable AI knowledge engine on 0G.
 Live: <https://0gora.temporalabs.com> · Built for the 0G Zero Cup.
 
-Versioning follows `0.1.x` during the tournament, leading to a `1.0.0` final.
-Tags mark each release; the newest version is at the top.
+Versioning uses `0.x.0` minor bumps for substantial changes during the tournament,
+leading to a `1.0.0` final. Tags mark each release; the newest version is at the top.
 
 ## [Unreleased] — planned
 - **0G Storage** for the corpus; on-chain settlement-tx link on the verification badge.
 - **Community commons** (post-tournament) — open contribution, topic bins, on-chain attribution & rewards.
+
+## [0.2.0] — 2026-06-23 — Framework / example split
+### Changed
+- **0Gora is now a reusable framework.** The services moved under a single `src/` umbrella —
+  `src/api` (RAG), `src/inference` (0G compute), `src/mcp` (agent surface), `src/webui` (Next.js),
+  `src/deploy` (compose + nginx). Behavior-preserving: Docker service names are unchanged, so every
+  compose-network reference still resolves.
+### Added
+- **Config-driven instances under `examples/`.** A deployment is now a small config folder that drives
+  the framework — the shipped one is [`examples/0g/`](examples/0g/). `0gora.config.json` declares branding,
+  example questions, seed corpus, and prompt overrides (committed, **secret-free**); `.env` holds only the
+  wallet key + runtime toggles (gitignored). To found your own agora, copy the folder and edit config.
+- **`GET /config`** — the backend serves the non-secret instance branding; the web UI renders whatever
+  agora a deployment is configured for. System prompts are templated from the instance name + ecosystem.
+- **Three ways to use 0Gora.** Beyond forking the repo: the **`0gora-mcp`** npm package (`npx 0gora-mcp`)
+  connects any agent to a running 0Gora; **`create-0gora`** (`npm create 0gora@latest`) scaffolds a new
+  instance from the framework; and an **agent skill** ([`src/skill/`](src/skill/)) teaches an agent to join
+  an existing agora and found its own. (Packages are publish-ready; not yet published.)
+### Fixed
+- **Backend env wiring** — `CONTRIBUTE_KEY` and `RELEVANCE_THRESHOLD` are now passed to the backend
+  container, so an `--env-file` value takes effect (the documented seed flow works). `seed.sh` fails fast
+  on an HTTP error instead of silently reporting success.
+### Removed
+- **GitBook config** (`.gitbook.yaml`, `docs/SUMMARY.md`) — docs are served in-site at `/docs`.
 
 ## [0.1.5] — 2026-06-23 — The public square
 ### Added

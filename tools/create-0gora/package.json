@@ -1,0 +1,38 @@
+{
+  "name": "create-0gora",
+  "version": "0.2.0",
+  "description": "Scaffold your own verifiable knowledge agora on 0G — `npm create 0gora@latest my-agora`",
+  "type": "module",
+  "bin": {
+    "create-0gora": "index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "keywords": [
+    "0g",
+    "0gora",
+    "create",
+    "scaffold",
+    "rag",
+    "verifiable-inference",
+    "ai-agents"
+  ],
+  "homepage": "https://0gora.temporalabs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TemporaLabs/0gora.git",
+    "directory": "tools/create-0gora"
+  },
+  "bugs": {
+    "url": "https://github.com/TemporaLabs/0gora/issues"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

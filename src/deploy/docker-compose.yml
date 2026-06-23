@@ -1,0 +1,59 @@
+name: 0gora
+
+services:
+  zerog:
+    build: ../inference
+    environment:
+      - PORT=8090
+      - ZEROG_RPC_URL=${ZEROG_RPC_URL:-https://evmrpc.0g.ai}
+      - ZEROG_MODEL=${ZEROG_MODEL:-zai-org/GLM-5-FP8}
+      - ZEROG_MODELS=${ZEROG_MODELS:-}
+      - ZEROG_MOCK=${ZEROG_MOCK:-false}
+      - ZEROG_PRIVATE_KEY=${ZEROG_PRIVATE_KEY:-}
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.1
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  backend:
+    build: ../api
+    environment:
+      - ZEROG_BASE_URL=http://zerog:8090/v1
+      - QDRANT_URL=http://qdrant:6333
+      # Backend-scoped knobs. Listed here (not just in .env) so an --env-file value
+      # actually reaches the container: CONTRIBUTE_KEY opens /contribute (seed.sh),
+      # RELEVANCE_THRESHOLD tunes the corpus-relevance gate. Empty key = closed.
+      - CONTRIBUTE_KEY=${CONTRIBUTE_KEY:-}
+      - RELEVANCE_THRESHOLD=${RELEVANCE_THRESHOLD:-0.70}
+    depends_on:
+      - zerog
+      - qdrant
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ../webui
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  mcp:
+    build: ../mcp
+    environment:
+      - PORT=8091
+      - OGORA_API=http://backend:8000   # call the backend directly over the compose network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  qdrant_data:

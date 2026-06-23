@@ -1,0 +1,24 @@
+# The 0G 0Gora — example overlay.
+#
+# Layers this instance's config onto the framework base compose in ../../src/deploy.
+# The base defines the generic services; this overlay mounts the instance's
+# 0gora.config.json into the backend so the framework renders *this* agora.
+#
+# Run (from the repo root):
+#   docker compose -f src/deploy/docker-compose.yml \
+#                  -f examples/0g/compose.override.yml \
+#                  --env-file examples/0g/.env up -d --build
+#
+# Add `-f src/deploy/docker-compose.prod.yml` before --env-file for TLS (nginx +
+# Let's Encrypt) in production.
+name: 0gora
+
+services:
+  backend:
+    # Mount the instance config (read-only) and tell the framework where it is.
+    # Relative to the project directory (src/deploy); examples/0g and src/deploy
+    # are both two levels below the repo root, so this path resolves either way.
+    volumes:
+      - ../../examples/0g/0gora.config.json:/example/0gora.config.json:ro
+    environment:
+      - OGORA_CONFIG=/example/0gora.config.json
