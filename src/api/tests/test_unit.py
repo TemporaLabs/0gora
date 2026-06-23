@@ -300,6 +300,32 @@ def test_config_malformed_value_keeps_structured_default(tmp_path):
         config._registry.cache_clear()
 
 
+def test_multi_instance_registry(monkeypatch):
+    """OGORA_INSTANCES → distinct co-hosted agoras, each its own collection; first is default;
+    unknown instance falls back to the default (never a mix)."""
+    from app import config
+
+    base = os.path.join(os.path.dirname(__file__), "../../..")
+    og = os.path.join(base, "examples/0g/0gora.config.json")
+    erc = os.path.join(base, "examples/erc-8226/0gora.config.json")
+    if not (os.path.exists(og) and os.path.exists(erc)):
+        pytest.skip("example configs not in build context (runs in repo checkout / CI)")
+
+    monkeypatch.setenv("OGORA_INSTANCES", f"{og},{erc}")
+    config._registry.cache_clear()
+    try:
+        assert [i["id"] for i in config.instances()] == ["0g", "erc-8226"]  # declared order
+        assert config.default_instance() == "0g"  # first = default
+        # isolated collections — corpora never mix
+        assert config.collection_for("0g") != config.collection_for("erc-8226")
+        assert config.collection_for("erc-8226") == "erc8226"
+        assert config.public("erc-8226")["name"] != config.public("0g")["name"]
+        # unknown instance → the safe default (first), never an arbitrary/mixed collection
+        assert config.collection_for("does-not-exist") == config.collection_for("0g")
+    finally:
+        config._registry.cache_clear()
+
+
 def test_embed_model_load_is_thread_safe():
     """Concurrent cold-start loads must not race (regression: torch meta-tensor crash)."""
     import threading

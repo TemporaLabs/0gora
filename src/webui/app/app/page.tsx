@@ -71,10 +71,12 @@ export default function Home() {
   const [model, setModel] = useState<string>("auto");
   // The agora (knowledge base) this chat talks to. A deployment can serve several
   // side by side; the switcher (left of the model picker) flips between them and the
-  // backend routes retrieval to that instance's corpus. Default to "0g" (the first
-  // instance); a single-agora deployment hides the switcher entirely.
+  // backend routes retrieval to that instance's corpus. Start empty (the backend
+  // treats that as its default) and let the /api/instances effect set the real default
+  // id — so a standalone non-0g deployment doesn't assume "0g". The switcher hides for
+  // a single-agora deployment.
   const [instances, setInstances] = useState<{ id: string; label: string }[]>([]);
-  const [instance, setInstance] = useState<string>("0g");
+  const [instance, setInstance] = useState<string>("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);

@@ -94,14 +94,17 @@ class SearchRequest(BaseModel):
     # a public endpoint reachable directly: cap k and query length to prevent abuse.
     query: str = Field(min_length=1, max_length=2000)
     k: int = Field(default=8, ge=1, le=20)
+    instance: str | None = None  # which agora's corpus to search; None → default instance
 
 
 @app.post("/search")
 async def search(req: SearchRequest):
     """Raw hybrid retrieval (no LLM) — returns the matching chunks + sources.
-    Used by the MCP `search_0g_knowledge` tool so agents can read the corpus directly."""
+    Used by the MCP `search_0g_knowledge` tool so agents can read the corpus directly.
+    Scoped to the requested instance's collection so co-hosted agoras stay separate."""
+    collection = config.collection_for(req.instance)
     try:
-        chunks = await run_in_threadpool(retrieve.hybrid_search, req.query, req.k)
+        chunks = await run_in_threadpool(retrieve.hybrid_search, req.query, req.k, collection)
     except Exception as exc:  # noqa: BLE001 — never surface a raw 500
         return {"query": req.query, "results": [], "error": str(exc)[:200]}
     return {
@@ -149,4 +152,4 @@ async def contribute_text(req: TextRequest, x_contribute_key: str | None = Heade
     _guard_contribute(x_contribute_key)
     collection = config.collection_for(req.instance)
     n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin, collection)
-    return {"source": req.source, "chunks": n}
+    return {"source": req.source, "instance": req.instance or config.default_instance(), "chunks": n}

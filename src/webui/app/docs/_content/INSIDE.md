@@ -21,7 +21,7 @@ copying that folder and editing config — you never touch `src/`.
 ## Components
 | Service | Role |
 |---------|------|
-| RAG API (FastAPI) | ingest, retrieve, generate · endpoints `/chat`, `/search`, `/models`, `/config` |
+| RAG API (FastAPI) | ingest, retrieve, generate · endpoints `/chat`, `/search`, `/models`, `/config`, `/instances` (co-hosted agoras) |
 | 0G inference (Node) | OpenAI-compatible front to the 0G broker; runs the model in a TEE and verifies (`processResponse`) |
 | MCP server | agent surface (`ask` / `search` / `list`) |
 | Web | landing, chat, docs |

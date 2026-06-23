@@ -19,9 +19,10 @@ src/mcp/
 ## Tools
 | Tool | What it does |
 |------|--------------|
-| `ask_0gora(question, model?)` | Grounded, cited answer + the **0G verification block** (verified, model, chatID). |
-| `search_0g_knowledge(query, k?)` | Raw matching passages + source URLs (hybrid retrieval, no LLM). |
+| `ask_0gora(question, model?, instance?)` | Grounded, cited answer + the **0G verification block** (verified, model, chatID). |
+| `search_0g_knowledge(query, k?, instance?)` | Raw matching passages + source URLs (hybrid retrieval, no LLM). |
 | `list_models()` | The TEE-verified 0G models 0Gora offers. |
+| `list_agoras()` | The knowledge agoras this deployment hosts. Pass an `id` as `instance` to `ask`/`search` a specific one (most deployments host one — omit `instance`). |
 
 ## Use it with Claude Code
 

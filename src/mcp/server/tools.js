@@ -33,12 +33,16 @@ export function createServer() {
         .string()
         .optional()
         .describe('Optional 0G model id; omit (or pass "auto") to let 0Gora auto-route to the best model per query'),
+      instance: z
+        .string()
+        .optional()
+        .describe("Optional agora id when a deployment co-hosts several (see list_agoras); omit for the default"),
     },
-    async ({ question, model }) => {
+    async ({ question, model, instance }) => {
       const d = await api("/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: question, ...(model ? { model } : {}) }),
+        body: JSON.stringify({ message: question, ...(model ? { model } : {}), ...(instance ? { instance } : {}) }),
       });
       const v = d.x_0g_verification || {};
       const cites = (d.citations || []).map((c) => `  [${c.n}] ${c.url || c.bin || ""}`).join("\n");
@@ -68,12 +72,16 @@ export function createServer() {
     {
       query: z.string().describe("Search query"),
       k: z.number().int().min(1).max(20).optional().describe("Number of passages to return (default 8)"),
+      instance: z
+        .string()
+        .optional()
+        .describe("Optional agora id when a deployment co-hosts several (see list_agoras); omit for the default"),
     },
-    async ({ query, k }) => {
+    async ({ query, k, instance }) => {
       const d = await api("/search", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query, k: k || 8 }),
+        body: JSON.stringify({ query, k: k || 8, ...(instance ? { instance } : {}) }),
       });
       const text =
         (d.results || [])
@@ -90,6 +98,20 @@ export function createServer() {
     async () => {
       const d = await api("/models", {});
       return { content: [{ type: "text", text: (d.models || []).join("\n") || "(none)" }] };
+    }
+  );
+
+  server.tool(
+    "list_agoras",
+    "List the knowledge agoras this 0Gora deployment hosts. Most host one (omit `instance` on the " +
+      "other tools); some co-host several (e.g. a 0G agora and an ERC-8226 agora) — pass an `id` from " +
+      "here as `instance` to ask/search a specific one.",
+    {},
+    async () => {
+      const d = await api("/instances", {});
+      const list = (d.instances || []).map((i) => `${i.id}\t${i.label}`).join("\n");
+      const def = d.default ? `\n(default: ${d.default})` : "";
+      return { content: [{ type: "text", text: (list || "(none)") + def }] };
     }
   );
 

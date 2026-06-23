@@ -125,14 +125,22 @@ def _registry() -> dict:
         paths = [single] if single else []
 
     default_collection = os.getenv("QDRANT_COLLECTION", "0gora")
+    multi = len(paths) > 1
     reg: dict = {}
     order: list[str] = []
     for i, p in enumerate(paths):
         cfg = _load_one(p)
         iid = str(cfg.get("id") or "").strip() or _slug_from_path(p) or f"instance{i + 1}"
-        cfg["_collection"] = str(cfg.get("collection") or default_collection).strip() or "0gora"
-        if iid not in reg:
-            order.append(iid)
+        # Two agoras must NEVER share an id (or the reserved "__order__" key) — that would
+        # collapse them onto one collection. Disambiguate so each stays separate.
+        if iid in reg or iid == "__order__":
+            iid = f"{iid}-{i + 1}"
+        # Collection: the config's explicit `collection`, else — when co-hosting — the
+        # instance id (distinct per agora, so a missing/malformed collection field can't
+        # silently mix corpora); single-instance keeps the shared default for back-compat.
+        explicit = str(cfg.get("collection") or "").strip()
+        cfg["_collection"] = explicit or (iid if multi else default_collection)
+        order.append(iid)
         reg[iid] = cfg
 
     if not reg:  # no config mounted at all → built-in defaults as a single instance.
