@@ -14,9 +14,9 @@
 
   "examples": [
     "What is 0G?",
+    "What is Auto model?",
     "What is 0G Storage?",
-    "How does TEE verification work?",
-    "Which models can I use?"
+    "How does TEE verification work?"
   ],
 
   "placeholder": "Ask 0Gora…",

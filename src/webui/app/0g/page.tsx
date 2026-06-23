@@ -31,9 +31,9 @@ const DEFAULT_CONFIG: InstanceConfig = {
   },
   examples: [
     "What is 0G?",
+    "What is Auto model?",
     "What is 0G Storage?",
     "How does TEE verification work?",
-    "Which models can I use?",
   ],
   placeholder: "Ask 0Gora…",
 };
@@ -147,14 +147,17 @@ export default function Home() {
         <a className="logo" href="/" title="Back to 0Gora">{cfg.logo}</a>
         <span className="tag">{cfg.instanceLabel}</span>
         <span className="spacer" />
-        <select value={model} onChange={(e) => setModel(e.target.value)} title="0G model — Auto picks the best per query">
-          <option value="auto">Auto</option>
-          {models.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+        <label className="model-pick" title="0G model — Auto picks the best one per query">
+          <span className="model-label">Model</span>
+          <select value={model} onChange={(e) => setModel(e.target.value)}>
+            <option value="auto">Auto</option>
+            {models.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </label>
         {CONTRIBUTE_ENABLED && (
           <button className="ghost" onClick={() => setShowContribute(true)}>
             + Contribute

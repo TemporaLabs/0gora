@@ -38,9 +38,9 @@ _DEFAULTS: dict = {
     },
     "examples": [
         "What is 0G?",
+        "What is Auto model?",
         "What is 0G Storage?",
         "How does TEE verification work?",
-        "Which models can I use?",
     ],
     "placeholder": "Ask 0Gora…",
     "corpus": {"seeds": []},
