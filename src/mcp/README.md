@@ -7,8 +7,10 @@ Protocol](https://modelcontextprotocol.io). Every answer is generated **and cryp
 This is the **agent-facing side of the agora**: humans use [`0gora.temporalabs.com`](https://0gora.temporalabs.com);
 agents use this MCP server. Same verifiable 0G brain.
 
+Published to npm as [`0gora-mcp`](https://www.npmjs.com/package/0gora-mcp) — run it with `npx`, no clone needed.
+
 ```
-mcp/
+src/mcp/
   server/   the MCP server — tools.js (shared) + stdio.js (local) + http.js (remote)
   client/   an example MCP client (call 0Gora from your own code)
   test/     smoke tests for both transports
@@ -28,22 +30,23 @@ mcp/
 claude mcp add --transport http 0gora https://0gora.temporalabs.com/mcp
 ```
 
-**Or run the stdio server locally:**
+**Or run the stdio server locally via the published package** (no clone):
 ```bash
-claude mcp add 0gora -- node /path/to/0gora/mcp/server/stdio.js
+claude mcp add 0gora -- npx -y 0gora-mcp
 ```
 or add to your project's `.mcp.json` (see [`.mcp.json.example`](.mcp.json.example)):
 ```json
 {
   "mcpServers": {
     "0gora": {
-      "command": "node",
-      "args": ["./mcp/server/stdio.js"],
+      "command": "npx",
+      "args": ["-y", "0gora-mcp"],
       "env": { "OGORA_API": "https://0gora.temporalabs.com/api" }
     }
   }
 }
 ```
+(From a clone instead of npm: `node src/mcp/server/stdio.js`.)
 Then ask Claude Code things like *"use 0gora to find out what 0G Storage is"* — it calls `ask_0gora` and
 gets a TEE-verified, cited answer.
 
@@ -51,7 +54,7 @@ gets a TEE-verified, cited answer.
 Agents like Claude Code bring their own MCP client — you don't need one. But to query 0Gora programmatically,
 [`client/example.mjs`](client/example.mjs) shows the pattern:
 ```bash
-cd mcp && npm install
+cd src/mcp && npm install
 npm run client:example -- "What is 0G Storage?"     # connects to the hosted endpoint
 ```
 
@@ -62,7 +65,7 @@ npm run client:example -- "What is 0G Storage?"     # connects to the hosted end
 
 ## Develop
 ```bash
-cd mcp && npm install
+cd src/mcp && npm install
 npm start            # stdio server   (server/stdio.js)
 npm run start:http   # remote server  (server/http.js, listens on :8091)
 npm test             # smoke-test all three tools over stdio
