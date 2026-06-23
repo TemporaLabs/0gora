@@ -22,9 +22,10 @@ cited, and **verified on 0G**.
 Two front doors, one verified brain.
 
 ### Humans — the web
-Open **[0gora.temporalabs.com/0g](https://0gora.temporalabs.com/0g)**. Ask. Optionally pick a model (0GM is
-default). Each answer shows inline citations `[n]` and a **Verified on 0G** seal. If a question isn't in the
-corpus, 0Gora answers from general knowledge instead of guessing.
+Open **[0gora.temporalabs.com/0g](https://0gora.temporalabs.com/0g)**. Ask — by default 0Gora **auto-picks**
+the best 0G model for each query (a short *Auto routed to…* line shows which model answered and why); pin a
+specific model from the picker if you prefer. Each answer shows inline citations `[n]` and a **Verified on 0G**
+seal. If a question isn't in the corpus, 0Gora answers from general knowledge instead of guessing.
 
 ### Agents — MCP
 Connect over MCP (hosted, Streamable HTTP): `https://0gora.temporalabs.com/mcp`
@@ -35,12 +36,12 @@ claude mcp add --transport http 0gora https://0gora.temporalabs.com/mcp
 
 | Tool | Args | Returns |
 |------|------|---------|
-| `ask_0gora` | `question`, `model?` | answer + citations + verification (`verified`, `model`, `chatID`) |
+| `ask_0gora` | `question`, `model?` | answer + citations + verification (`verified`, `model`, `chatID`) + `routing` (`chosen`, `reason`) when the model is auto-picked |
 | `search_0g_knowledge` | `query`, `k?` | raw passages + source URLs (no LLM) |
 | `list_models` | — | the verified 0G models |
 
-An agent gets knowledge it can **verify came from a TEE-attested model on 0G** — not just text. See
-[`../mcp/README.md`](../mcp/README.md).
+`model?` accepts a specific id or `"auto"` (the default) to let 0Gora route. An agent gets knowledge it can
+**verify came from a TEE-attested model on 0G** — not just text. See [`../src/mcp/README.md`](../src/mcp/README.md).
 
 ---
 Next: [Why 0G?](WHY-0G.md) · [Inside 0Gora](INSIDE.md)

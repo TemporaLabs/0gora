@@ -255,6 +255,8 @@ def test_rag_cascades_to_default_on_provider_failure(monkeypatch):
     """In auto mode, a provider failure on the chosen model retries the default."""
     import asyncio
 
+    import httpx
+
     from app import config, rag
 
     config.load.cache_clear()
@@ -263,7 +265,9 @@ def test_rag_cascades_to_default_on_provider_failure(monkeypatch):
     async def fake_chat(messages, model=None, *, verify=True, max_tokens=None):
         seen.append(model)
         if model == "deepseek-v4-pro":
-            raise RuntimeError("InsufficientAvailableBalance")
+            # Real provider/availability failures surface as httpx errors (sidecar 5xx;
+            # zerog.chat raise_for_status). Only these trigger the cascade now.
+            raise httpx.ConnectError("provider unavailable")
         return {"answer": "ok", "verification": {"verified": True, "model": model}}
 
     async def fake_choose(query, *, has_context, top_score):

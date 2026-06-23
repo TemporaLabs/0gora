@@ -36,7 +36,7 @@
   },
 
   "models": {
-    "$comment": "Auto model routing (v0.2.1). `auto` defaults the picker to Auto; the framework then picks the best model per query. `default` is the safe model used for the classifier fallback + cascade when a provider is unavailable; `router` is the (cheap, unverified) model that does the classification. `roster` lists selectable models with their lanes — ids MUST match the funded ZEROG_MODELS allowlist in .env. To tune routing, edit this block; no code change.",
+    "$comment": "Auto model routing (v0.2.1). `auto` defaults the picker to Auto; the framework then picks the best model per query. `default` is the safe model used for the classifier fallback + cascade when a provider is unavailable; `router` is the (cheap, unverified) model that does the classification. `roster` lists selectable models with their lanes: `strengths` drives the routing decision (heuristic + classifier), while `tier` is advisory context shown to the classifier only. ids MUST match the funded ZEROG_MODELS allowlist in .env. To tune routing, edit this block; no code change.",
     "auto": true,
     "default": "0gm",
     "router": "0gm",

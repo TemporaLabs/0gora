@@ -13,6 +13,8 @@ from __future__ import annotations
 import os
 import re
 
+import httpx
+
 from . import config, retrieve, router, zerog
 
 # Top bge cosine below this → treat the corpus as having nothing relevant.
@@ -70,7 +72,10 @@ async def _generate(messages: list[dict], target: str | None, routing: dict | No
     is never silently overridden. Updates `routing` to reflect the model that answered."""
     try:
         return await zerog.chat(messages, target)
-    except Exception:  # noqa: BLE001 — provider/availability failure → try the safe default.
+    except httpx.HTTPError:
+        # Provider/availability failure (5xx from the sidecar, timeout, connection) →
+        # try the safe default. Scoped to httpx errors so a real bug (TypeError, etc.)
+        # propagates instead of silently triggering a second billed inference.
         default = config.default_model()
         if routing is not None and default and default != target:
             routing["chosen"] = default

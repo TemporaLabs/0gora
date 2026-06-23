@@ -69,8 +69,10 @@ Lanes are **intended starting points**, to be validated empirically (§7). No be
 
 ## 5. Non-negotiable guardrails
 
-1. **Availability filter + cascade-on-fail.** Router chooses only from `allowModels ∩ currently-served`; on a provider 502
-   it **retries on the default model**. A query must never die because a specialist's sub-account ran dry. (#1 prod failure mode.)
+1. **Cascade-on-fail (reactive availability).** The router chooses from the configured roster; availability is handled
+   **reactively** — on a provider failure (e.g. a specialist's sub-account ran dry → 5xx) the answer **retries on the
+   default model** (`rag._generate`). No proactive served-set intersection; the cascade is the guardrail. A query must
+   never die because a specialist is unfunded. (#1 prod failure mode.)
 2. **Transparency.** Surface the choice by the verification seal — *"Routed to deepseek-v4-pro · code/math query"*.
    For a verify-don't-trust product, "why this model" should be visible. Strengthens the story.
 
@@ -93,7 +95,7 @@ Routing **policy** = config (per-agora); routing **engine** = framework code. Ne
 ```
 
 The classifier prompt is built from `roster`, so founders tune routing by editing config.
-`ZEROG_MODELS` (.env) stays the funding allowlist; the router intersects with it.
+`ZEROG_MODELS` (.env) stays the funding allowlist; the roster ids must be a subset of it (the cascade covers any that are momentarily unfunded).
 
 ## 7. Evaluation — ship the feature with its proof
 
@@ -104,7 +106,7 @@ Auto-routing is only worth it if measurably better/cheaper. Harness:
 
 ## 8. Code changes (where it lands)
 
-- **`src/api/app/router.py`** (new) — `choose(query, retrieval_signals, roster) → {model, reason}`. Heuristic (A) → `0gm` classifier (B) → availability intersection.
+- **`src/api/app/router.py`** (new) — `choose(query, *, has_context, top_score) → {chosen, reason, via}`. Heuristic (A) → `0gm` classifier (B) → safe default fallback; availability is the caller's reactive cascade (`rag._generate`).
 - **`rag.answer`** — when `model in (None, "auto")`, call `router.choose(...)`; feed it `top_score`/`chunks` (grounded-vs-general is a useful, free signal).
 - **`zerog` / inference** — unverified fast path for the classification call (skip `processResponse`); cascade-to-default on 502.
 - **webui** — picker gains **"Auto (recommended)"** as default; render the routing reason near the seal; keep manual pin available.
