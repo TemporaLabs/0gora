@@ -14,6 +14,7 @@ export default function Landing() {
         <nav className="lp-nav">
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
           <Link href={DOCS_URL}>Docs</Link>
+          <Link className="lp-nav-app" href={APP_URL}>App</Link>
         </nav>
       </header>
 
