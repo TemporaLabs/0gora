@@ -258,7 +258,7 @@ export default function Home() {
         <span className="spacer" />
         {instances.length > 1 && (
           <label className="model-pick" title="Knowledge base — which 0Gora to ask">
-            <span className="model-label">Agora</span>
+            <span className="model-label">0Gora</span>
             <select value={instance} onChange={(e) => setInstance(e.target.value)}>
               {instances.map((i) => (
                 <option key={i.id} value={i.id}>
