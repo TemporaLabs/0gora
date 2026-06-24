@@ -20,7 +20,7 @@ async function api(path, init) {
 }
 
 export function createServer() {
-  const server = new McpServer({ name: "0gora", version: "0.2.0" });
+  const server = new McpServer({ name: "0gora", version: "0.2.3" });
 
   server.tool(
     "ask_0gora",

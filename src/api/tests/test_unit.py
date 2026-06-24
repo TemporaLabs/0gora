@@ -322,6 +322,12 @@ def test_multi_instance_registry(monkeypatch):
         assert config.public("erc-8226")["name"] != config.public("0g")["name"]
         # unknown instance → the safe default (first), never an arbitrary/mixed collection
         assert config.collection_for("does-not-exist") == config.collection_for("0g")
+        # resolve_instance echoes the id the request actually lands on: known stays put,
+        # empty/unknown collapse to the default (so a response never reports a wrong agora).
+        assert config.resolve_instance("erc-8226") == "erc-8226"
+        assert config.resolve_instance("does-not-exist") == "0g"
+        assert config.resolve_instance("") == "0g"
+        assert config.resolve_instance(None) == "0g"
     finally:
         config._registry.cache_clear()
 

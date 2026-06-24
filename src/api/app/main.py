@@ -136,7 +136,7 @@ async def contribute(req: ContributeRequest, x_contribute_key: str | None = Head
         res = await run_in_threadpool(ingest.ingest_sitemap, req.url, req.bin, req.max_pages, collection)
     else:
         res = {"chunks": await run_in_threadpool(ingest.ingest_url, req.url, req.bin, collection)}
-    return {"url": req.url, "bin": req.bin, "mode": req.mode, "instance": req.instance or config.default_instance(), **res}
+    return {"url": req.url, "bin": req.bin, "mode": req.mode, "instance": config.resolve_instance(req.instance), **res}
 
 
 class TextRequest(BaseModel):
@@ -152,4 +152,4 @@ async def contribute_text(req: TextRequest, x_contribute_key: str | None = Heade
     _guard_contribute(x_contribute_key)
     collection = config.collection_for(req.instance)
     n = await run_in_threadpool(ingest.ingest_text, req.text, req.source, req.bin, collection)
-    return {"source": req.source, "instance": req.instance or config.default_instance(), "chunks": n}
+    return {"source": req.source, "instance": config.resolve_instance(req.instance), "chunks": n}

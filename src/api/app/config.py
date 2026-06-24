@@ -171,6 +171,16 @@ def default_instance() -> str:
     return _registry()["__order__"][0]
 
 
+def resolve_instance(instance: str | None = None) -> str:
+    """The instance id a request actually resolves to — the default for an empty,
+    unknown, or reserved value. Mirrors _cfg()'s resolution so a response can echo the
+    id the data truly landed on (not the caller's raw, possibly-typo'd value)."""
+    reg = _registry()
+    if instance and instance != "__order__" and instance in reg:
+        return instance
+    return reg["__order__"][0]
+
+
 def instances() -> list[dict]:
     """The list the UI switcher renders: [{id, label}], in declared order."""
     reg = _registry()

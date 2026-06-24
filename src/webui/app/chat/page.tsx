@@ -114,25 +114,36 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  // When the selected agora changes, swap ONLY its per-agora bits and clear the chat:
+  // When the selected agora changes, swap its per-agora bits and clear the chat:
   // a conversation belongs to one agora's corpus and must not carry across a switch.
-  // The 0Gora brand stays constant across agoras — logo, tag, and hero are always the
-  // 0Gora/ØGora chrome. Only the example bubbles and the input placeholder change per
-  // agora (e.g. "Ask ERC-8226 0Gora…"); voice is a functional mic toggle, also per agora.
+  //
+  // Branding depends on how many agoras this deployment co-hosts:
+  //  • Multiple (the switcher is shown) → the 0Gora brand stays CONSTANT across agoras
+  //    (logo, tag, hero are always the 0Gora/ØGora chrome); only the example bubbles and
+  //    the input placeholder change per agora (e.g. "Ask ERC-8226 0Gora…"). This keeps
+  //    the header from rebranding mid-session when you flip the switcher.
+  //  • Single agora (the framework's "fork it, edit the config, deploy your own" path) →
+  //    the deployment's OWN configured branding (logo, instanceLabel, hero) is shown.
+  // Voice is a functional mic toggle, always per agora.
   useEffect(() => {
     setMessages([]);
+    const multi = instances.length > 1;
     fetch(`/api/config?instance=${encodeURIComponent(instance)}`)
       .then((r) => r.json())
       .then((d) =>
-        setCfg({
-          ...DEFAULT_CONFIG,
-          examples: Array.isArray(d.examples) && d.examples.length ? d.examples : DEFAULT_CONFIG.examples,
-          placeholder: d.placeholder || DEFAULT_CONFIG.placeholder,
-          voice: { ...DEFAULT_CONFIG.voice, ...(d.voice || {}) },
-        })
+        setCfg(
+          multi
+            ? {
+                ...DEFAULT_CONFIG,
+                examples: Array.isArray(d.examples) && d.examples.length ? d.examples : DEFAULT_CONFIG.examples,
+                placeholder: d.placeholder || DEFAULT_CONFIG.placeholder,
+                voice: { ...DEFAULT_CONFIG.voice, ...(d.voice || {}) },
+              }
+            : { ...DEFAULT_CONFIG, ...d, hero: { ...DEFAULT_CONFIG.hero, ...(d.hero || {}) } }
+        )
       )
       .catch(() => {});
-  }, [instance]);
+  }, [instance, instances.length]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
