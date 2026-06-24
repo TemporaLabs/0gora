@@ -1,6 +1,6 @@
 {
   "name": "create-0gora",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "Scaffold your own verifiable knowledge agora on 0G — `npm create 0gora@latest my-agora`",
   "type": "module",
   "bin": {
