@@ -1,6 +1,6 @@
 {
   "name": "0gora-mcp",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "MCP server for 0Gora — connect any AI agent to a verifiable, TEE-attested 0G knowledge agora (ask / search / list models)",
   "type": "module",
   "bin": {
