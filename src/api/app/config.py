@@ -48,7 +48,7 @@ _DEFAULTS: dict = {
         "What is 0G Storage?",
         "How does TEE verification work?",
     ],
-    "placeholder": "Ask 0Gora…",
+    "placeholder": "Ask 0G 0Gora…",
     "corpus": {"seeds": []},
     "prompts": {"grounded": None, "chat": None},
     # Voice input. OFF by default — the framework ships voice-free. An instance opts

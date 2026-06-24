@@ -24,7 +24,7 @@
     "What's the status of ERC-8226 and where is it discussed?"
   ],
 
-  "placeholder": "Ask about ERC-8226…",
+  "placeholder": "Ask ERC-8226 0Gora…",
 
   "corpus": {
     "$comment": "Seed sources for this agora, ingested via POST /contribute (see seed.sh). Source 1 is the ERC text in the ethereum/ERCs repo; source 2 is the Ethereum Magicians discussion thread. NOTE: extraction quality is verified at seed time — if a source yields too few chunks (e.g. a JS-rendered Discourse thread paginates its replies), switch it to the raw markdown URL or to mode 'site' with a small max_pages.",

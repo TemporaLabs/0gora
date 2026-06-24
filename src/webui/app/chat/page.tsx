@@ -36,7 +36,7 @@ const DEFAULT_CONFIG: InstanceConfig = {
     "What is 0G Storage?",
     "How does TEE verification work?",
   ],
-  placeholder: "Ask 0Gora…",
+  placeholder: "Ask 0G 0Gora…",
   voice: { enabled: false },
 };
 

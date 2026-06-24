@@ -24,7 +24,7 @@
     "How does TEE verification work?"
   ],
 
-  "placeholder": "Ask 0Gora…",
+  "placeholder": "Ask 0G 0Gora…",
 
   "$comment_voice": "Voice input is OPT-IN. Setting enabled=true shows the mic and posts audio to the self-hosted STT service (/transcribe) — works in every browser, audio stays on-box. You must ALSO run the STT service by deploying with the `voice` compose profile (COMPOSE_PROFILES=voice in .env, or --profile voice). The framework default is voice off.",
   "voice": { "enabled": true },
