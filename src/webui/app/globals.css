@@ -170,9 +170,13 @@ button.ghost { background: transparent; }
 .lp-head { position: sticky; top: 0; z-index: 10; display: flex; align-items: center;
   justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border);
   background: rgba(10, 10, 15, 0.82); backdrop-filter: blur(10px); }
-.lp-nav { display: flex; gap: 22px; font-size: 14px; }
+.lp-nav { display: flex; align-items: center; gap: 22px; font-size: 14px; }
 .lp-nav a { color: var(--muted); text-decoration: none; }
 .lp-nav a:hover { color: var(--text); }
+/* App button — same purple gradient as the landing's primary CTAs. */
+.lp-nav a.lp-nav-app { padding: 7px 16px; border-radius: 8px; color: #fff; font-weight: 600;
+  background-image: var(--grad); box-shadow: 0 4px 16px rgba(146, 0, 225, 0.28); transition: box-shadow 0.15s, transform 0.15s; }
+.lp-nav a.lp-nav-app:hover { color: #fff; box-shadow: 0 6px 22px rgba(255, 63, 164, 0.38); transform: translateY(-1px); }
 
 /* hero */
 .lp-hero { position: relative; overflow: hidden; padding: 96px 24px 104px; text-align: center; }

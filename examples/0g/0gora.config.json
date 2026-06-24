@@ -1,6 +1,11 @@
 {
   "$comment": "The 0G 0Gora — the example instance that ships with the framework. This file is the SINGLE declarative source of truth for everything that makes this instance about 0G: its branding, its example questions, its seed corpus, and its system prompts. It contains NO secrets — the wallet key and runtime toggles live in .env (gitignored). To found your own 0Gora: copy this folder, edit this file, point .env at your funded 0G wallet, and deploy. The framework in ../../src reads this at runtime (mounted at /example/0gora.config.json); none of it is baked into the code.",
 
+  "$comment_instance": "`id` is this agora's stable handle (used in API calls + the in-app switcher); `collection` is its OWN Qdrant collection, so co-hosted agoras never mix corpora; `switcherLabel` is the short name shown in the switcher dropdown.",
+  "id": "0g",
+  "collection": "0gora",
+  "switcherLabel": "0G",
+
   "name": "0Gora",
   "logo": "ØGora",
   "instanceLabel": "the 0G agora · an example built on 0Gora",
@@ -19,7 +24,7 @@
     "How does TEE verification work?"
   ],
 
-  "placeholder": "Ask 0Gora…",
+  "placeholder": "Ask 0G 0Gora…",
 
   "$comment_voice": "Voice input is OPT-IN. Setting enabled=true shows the mic and posts audio to the self-hosted STT service (/transcribe) — works in every browser, audio stays on-box. You must ALSO run the STT service by deploying with the `voice` compose profile (COMPOSE_PROFILES=voice in .env, or --profile voice). The framework default is voice off.",
   "voice": { "enabled": true },

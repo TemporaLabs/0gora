@@ -13,7 +13,7 @@ await client.connect(transport);
 
 let fail = 0;
 const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-const expect = ["ask_0gora", "list_models", "search_0g_knowledge"];
+const expect = ["ask_0gora", "list_agoras", "list_models", "search_0g_knowledge"];
 console.log("tools:", tools.join(", "));
 if (JSON.stringify(tools) !== JSON.stringify(expect)) { console.log("FAIL: tool list mismatch"); fail++; }
 

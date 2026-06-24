@@ -40,27 +40,27 @@ def _id(source: str, i: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"{source}#{i}"))
 
 
-def _store(text: str, source: str, bin: str) -> int:
+def _store(text: str, source: str, bin: str, collection: str | None = None) -> int:
     chunks = chunk(text)
     if not chunks:
         return 0
     vecs = embed.embed(chunks)
-    vectorstore.ensure_collection(embed.dim())
+    vectorstore.ensure_collection(embed.dim(), collection=collection)
     points = [
         {"id": _id(source, i), "vector": v, "payload": {"text": ch, "url": source, "bin": bin}}
         for i, (ch, v) in enumerate(zip(chunks, vecs))
     ]
-    vectorstore.upsert(points)
+    vectorstore.upsert(points, collection=collection)
     return len(chunks)
 
 
-def ingest_url(url: str, bin: str = "0g") -> int:
-    return _store(clean(fetch(url)), url, bin)
+def ingest_url(url: str, bin: str = "0g", collection: str | None = None) -> int:
+    return _store(clean(fetch(url)), url, bin, collection)
 
 
-def ingest_text(text: str, source: str = "paste", bin: str = "0g") -> int:
+def ingest_text(text: str, source: str = "paste", bin: str = "0g", collection: str | None = None) -> int:
     """Ingest raw pasted text (e.g. an X post the crawler can't reach)."""
-    return _store(text, source, bin)
+    return _store(text, source, bin, collection)
 
 
 def _prefix(url: str) -> str:
@@ -82,7 +82,7 @@ def _links(url: str, html: str) -> set[str]:
     return out
 
 
-def ingest_site(start_url: str, bin: str = "0g", max_pages: int = 40) -> dict:
+def ingest_site(start_url: str, bin: str = "0g", max_pages: int = 40, collection: str | None = None) -> dict:
     """Recursive crawl: follow same-host links under the start path; ingest each page."""
     prefix = _prefix(start_url)
     seen: set[str] = set()
@@ -98,14 +98,14 @@ def ingest_site(start_url: str, bin: str = "0g", max_pages: int = 40) -> dict:
         except Exception:
             continue
         pages += 1
-        total += _store(clean(html), u, bin)
+        total += _store(clean(html), u, bin, collection)
         for link in _links(u, html):
             if link not in seen and link.startswith(prefix):
                 q.append(link)
     return {"pages": pages, "chunks": total}
 
 
-def ingest_sitemap(sitemap_url: str, bin: str = "0g", max_pages: int = 80) -> dict:
+def ingest_sitemap(sitemap_url: str, bin: str = "0g", max_pages: int = 80, collection: str | None = None) -> dict:
     """Parse a sitemap.xml and ingest each listed URL."""
     try:
         xml = fetch(sitemap_url)
@@ -115,7 +115,7 @@ def ingest_sitemap(sitemap_url: str, bin: str = "0g", max_pages: int = 80) -> di
     total = pages = 0
     for u in locs[:max_pages]:
         try:
-            total += ingest_url(u.strip(), bin)
+            total += ingest_url(u.strip(), bin, collection)
             pages += 1
         except Exception:
             continue

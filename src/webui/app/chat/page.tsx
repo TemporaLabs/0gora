@@ -36,7 +36,7 @@ const DEFAULT_CONFIG: InstanceConfig = {
     "What is 0G Storage?",
     "How does TEE verification work?",
   ],
-  placeholder: "Ask 0Gora…",
+  placeholder: "Ask 0G 0Gora…",
   voice: { enabled: false },
 };
 
@@ -69,6 +69,14 @@ export default function Home() {
   const [models, setModels] = useState<string[]>([]);
   // Default to Auto: the backend picks the best model per query (manual pin still available).
   const [model, setModel] = useState<string>("auto");
+  // The agora (knowledge base) this chat talks to. A deployment can serve several
+  // side by side; the switcher (left of the model picker) flips between them and the
+  // backend routes retrieval to that instance's corpus. Start empty (the backend
+  // treats that as its default) and let the /api/instances effect set the real default
+  // id — so a standalone non-0g deployment doesn't assume "0g". The switcher hides for
+  // a single-agora deployment.
+  const [instances, setInstances] = useState<{ id: string; label: string }[]>([]);
+  const [instance, setInstance] = useState<string>("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,6 +90,8 @@ export default function Home() {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
+  // Fetched once: the model allowlist (shared across agoras — one funded 0G wallet
+  // serves them all) and the list of agoras this deployment hosts (for the switcher).
   useEffect(() => {
     fetch("/api/models")
       .then((r) => r.json())
@@ -91,12 +101,49 @@ export default function Home() {
         // Keep the default on "Auto"; the live list just populates the manual-pin options.
       })
       .catch(() => {});
-    // Pull this instance's branding/examples from the backend (config-driven).
-    fetch("/api/config")
+    fetch("/api/instances")
       .then((r) => r.json())
-      .then((d) => setCfg((c) => ({ ...c, ...d, hero: { ...c.hero, ...(d.hero || {}) } })))
+      .then((d) => {
+        const list: { id: string; label: string }[] = d.instances || [];
+        setInstances(list);
+        // Keep the current selection if it's valid; else snap to the server default.
+        if (list.length) {
+          setInstance((cur) => (list.some((i) => i.id === cur) ? cur : d.default || list[0].id));
+        }
+      })
       .catch(() => {});
   }, []);
+
+  // When the selected agora changes, swap its per-agora bits and clear the chat:
+  // a conversation belongs to one agora's corpus and must not carry across a switch.
+  //
+  // Branding depends on how many agoras this deployment co-hosts:
+  //  • Multiple (the switcher is shown) → the 0Gora brand stays CONSTANT across agoras
+  //    (logo, tag, hero are always the 0Gora/ØGora chrome); only the example bubbles and
+  //    the input placeholder change per agora (e.g. "Ask ERC-8226 0Gora…"). This keeps
+  //    the header from rebranding mid-session when you flip the switcher.
+  //  • Single agora (the framework's "fork it, edit the config, deploy your own" path) →
+  //    the deployment's OWN configured branding (logo, instanceLabel, hero) is shown.
+  // Voice is a functional mic toggle, always per agora.
+  useEffect(() => {
+    setMessages([]);
+    const multi = instances.length > 1;
+    fetch(`/api/config?instance=${encodeURIComponent(instance)}`)
+      .then((r) => r.json())
+      .then((d) =>
+        setCfg(
+          multi
+            ? {
+                ...DEFAULT_CONFIG,
+                examples: Array.isArray(d.examples) && d.examples.length ? d.examples : DEFAULT_CONFIG.examples,
+                placeholder: d.placeholder || DEFAULT_CONFIG.placeholder,
+                voice: { ...DEFAULT_CONFIG.voice, ...(d.voice || {}) },
+              }
+            : { ...DEFAULT_CONFIG, ...d, hero: { ...DEFAULT_CONFIG.hero, ...(d.hero || {}) } }
+        )
+      )
+      .catch(() => {});
+  }, [instance, instances.length]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -166,7 +213,7 @@ export default function Home() {
       const r = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: q, model: model || "auto" }),
+        body: JSON.stringify({ message: q, model: model || "auto", instance }),
       });
       // Parse defensively: an error response may be plain text, not JSON.
       const raw = await r.text();
@@ -220,6 +267,18 @@ export default function Home() {
         <a className="logo" href="/" title="Back to 0Gora">{cfg.logo}</a>
         <span className="tag">{cfg.instanceLabel}</span>
         <span className="spacer" />
+        {instances.length > 1 && (
+          <label className="model-pick" title="Knowledge base — which 0Gora to ask">
+            <span className="model-label">0Gora</span>
+            <select value={instance} onChange={(e) => setInstance(e.target.value)}>
+              {instances.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="model-pick" title="0G model — Auto picks the best one per query">
           <span className="model-label">Model</span>
           <select value={model} onChange={(e) => setModel(e.target.value)}>

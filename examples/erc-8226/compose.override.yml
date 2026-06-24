@@ -1,0 +1,25 @@
+# The ERC-8226 0Gora — STANDALONE example overlay.
+#
+# Runs ERC-8226 on its OWN, as a single-agora deployment (useful for local dev or a
+# dedicated host). To co-host it WITH the 0G agora behind one in-app switcher — the
+# production layout — use ../multi/compose.override.yml instead (it mounts both
+# configs and sets OGORA_INSTANCES).
+#
+# Run (from the repo root):
+#   docker compose -f src/deploy/docker-compose.yml \
+#                  -f examples/erc-8226/compose.override.yml \
+#                  --env-file examples/erc-8226/.env up -d --build
+#
+# Add `-f src/deploy/docker-compose.prod.yml` before --env-file for TLS in production.
+name: 0gora
+
+services:
+  backend:
+    # Mount this instance's config (read-only) and point the framework at it.
+    # QDRANT_COLLECTION matches the config's `collection`, so a standalone run stores
+    # the corpus under `erc8226` (kept distinct even if it later shares a Qdrant).
+    volumes:
+      - ../../examples/erc-8226/0gora.config.json:/example/0gora.config.json:ro
+    environment:
+      - OGORA_CONFIG=/example/0gora.config.json
+      - QDRANT_COLLECTION=erc8226
